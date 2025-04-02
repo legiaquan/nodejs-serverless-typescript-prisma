@@ -1,21 +1,25 @@
-import { Router } from "express"
+import { Router } from 'express';
 
-import { ProductController } from "../controllers/product.controller"
-import { validateBody, validateParams, validateQuery } from "../middleware/validation.middleware"
-import { CreateProductDTO } from "../dtos/product/create-product.dto"
-import { UpdateProductDTO } from "../dtos/product/update-product.dto"
-import { IdParamDTO } from "../dtos/params/id-param.dto"
-import { SearchDTO } from "../dtos/query/search.dto"
-import { PriceRangeDTO } from "../dtos/query/price-range.dto"
-import { ProductFilterDTO } from "../dtos/query/product-filter.dto"
-import { asyncHandler } from "../middleware/global-error-handler"
-import { authenticate, requirePermission, requirePermissionAndOwnership } from "../middleware/auth.middleware"
-import { ProductService } from "../services/product.service"
-import { Permission } from "../constants/permissions"
+import { Permission } from '../constants/permissions';
+import { ProductController } from '../controllers/product.controller';
+import { IdParamDTO } from '../dtos/params/id-param.dto';
+import { CreateProductDTO } from '../dtos/product/create-product.dto';
+import { UpdateProductDTO } from '../dtos/product/update-product.dto';
+import { PriceRangeDTO } from '../dtos/query/price-range.dto';
+import { ProductFilterDTO } from '../dtos/query/product-filter.dto';
+import { SearchDTO } from '../dtos/query/search.dto';
+import {
+  authenticate,
+  requirePermission,
+  requirePermissionAndOwnership,
+} from '../middleware/auth.middleware';
+import { asyncHandler } from '../middleware/global-error-handler';
+import { validateBody, validateParams, validateQuery } from '../middleware/validation.middleware';
+import { ProductService } from '../services/product.service';
 
-const router = Router()
-const productController = new ProductController()
-const productService = new ProductService()
+const router = Router();
+const productController = new ProductController();
+const productService = new ProductService();
 
 /**
  * @swagger
@@ -153,7 +157,7 @@ const productService = new ProductService()
  *                     pagination:
  *                       $ref: '#/components/schemas/PaginationInfo'
  */
-router.get("/", validateQuery(ProductFilterDTO), asyncHandler(productController.getAllProducts))
+router.get('/', validateQuery(ProductFilterDTO), asyncHandler(productController.getAllProducts));
 
 /**
  * @swagger
@@ -188,7 +192,7 @@ router.get("/", validateQuery(ProductFilterDTO), asyncHandler(productController.
  *       200:
  *         description: Search results
  */
-router.get("/search", validateQuery(SearchDTO), asyncHandler(productController.searchProducts))
+router.get('/search', validateQuery(SearchDTO), asyncHandler(productController.searchProducts));
 
 /**
  * @swagger
@@ -232,7 +236,11 @@ router.get("/search", validateQuery(SearchDTO), asyncHandler(productController.s
  *       400:
  *         description: Bad request - invalid price range
  */
-router.get("/price-range", validateQuery(PriceRangeDTO), asyncHandler(productController.getProductsByPriceRange))
+router.get(
+  '/price-range',
+  validateQuery(PriceRangeDTO),
+  asyncHandler(productController.getProductsByPriceRange)
+);
 
 /**
  * @swagger
@@ -255,7 +263,7 @@ router.get("/price-range", validateQuery(PriceRangeDTO), asyncHandler(productCon
  *       400:
  *         description: Bad request - invalid threshold
  */
-router.get("/low-stock", asyncHandler(productController.getLowStockProducts))
+router.get('/low-stock', asyncHandler(productController.getLowStockProducts));
 
 /**
  * @swagger
@@ -293,7 +301,7 @@ router.get("/low-stock", asyncHandler(productController.getLowStockProducts))
  *       404:
  *         description: Product not found
  */
-router.get("/:id", validateParams(IdParamDTO), asyncHandler(productController.getProductById))
+router.get('/:id', validateParams(IdParamDTO), asyncHandler(productController.getProductById));
 
 /**
  * @swagger
@@ -322,12 +330,12 @@ router.get("/:id", validateParams(IdParamDTO), asyncHandler(productController.ge
  *         description: Product not found
  */
 router.get(
-  "/:id/logs",
+  '/:id/logs',
   authenticate,
   validateParams(IdParamDTO),
   requirePermission(Permission.VIEW_PRODUCTS),
-  asyncHandler(productController.getProductActivityLogs),
-)
+  asyncHandler(productController.getProductActivityLogs)
+);
 
 /**
  * @swagger
@@ -371,12 +379,12 @@ router.get(
  *         description: Forbidden - insufficient permissions
  */
 router.post(
-  "/",
+  '/',
   authenticate,
   requirePermission(Permission.CREATE_PRODUCT),
   validateBody(CreateProductDTO),
-  asyncHandler(productController.createProduct),
-)
+  asyncHandler(productController.createProduct)
+);
 
 /**
  * @swagger
@@ -413,17 +421,17 @@ router.post(
  *         description: Product not found
  */
 router.put(
-  "/:id",
+  '/:id',
   authenticate,
   validateParams(IdParamDTO),
   validateBody(UpdateProductDTO),
-  requirePermissionAndOwnership(Permission.UPDATE_PRODUCT, async (req) => {
-    const productId = Number.parseInt(req.params.id, 10)
-    const product = await productService.getProductById(productId)
-    return product ? product.createdBy : null
+  requirePermissionAndOwnership(Permission.UPDATE_PRODUCT, async req => {
+    const productId = Number.parseInt(req.params.id, 10);
+    const product = await productService.getProductById(productId);
+    return product ? product.createdBy : null;
   }),
-  asyncHandler(productController.updateProduct),
-)
+  asyncHandler(productController.updateProduct)
+);
 
 /**
  * @swagger
@@ -452,16 +460,16 @@ router.put(
  *         description: Product not found
  */
 router.delete(
-  "/:id",
+  '/:id',
   authenticate,
   validateParams(IdParamDTO),
-  requirePermissionAndOwnership(Permission.DELETE_PRODUCT, async (req) => {
-    const productId = Number.parseInt(req.params.id, 10)
-    const product = await productService.getProductById(productId)
-    return product ? product.createdBy : null
+  requirePermissionAndOwnership(Permission.DELETE_PRODUCT, async req => {
+    const productId = Number.parseInt(req.params.id, 10);
+    const product = await productService.getProductById(productId);
+    return product ? product.createdBy : null;
   }),
-  asyncHandler(productController.deleteProduct),
-)
+  asyncHandler(productController.deleteProduct)
+);
 
 /**
  * @swagger
@@ -494,11 +502,10 @@ router.delete(
  *         description: Forbidden - insufficient permissions
  */
 router.post(
-  "/bulk",
+  '/bulk',
   authenticate,
   requirePermission(Permission.MANAGE_ALL),
-  asyncHandler(productController.bulkCreateProducts),
-)
+  asyncHandler(productController.bulkCreateProducts)
+);
 
-export default router
-
+export default router;

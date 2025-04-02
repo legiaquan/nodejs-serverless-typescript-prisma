@@ -1,7 +1,8 @@
-import { IsOptional, IsDate } from "class-validator"
-import { Expose, Type } from "class-transformer"
-import { PaginationDTO } from "./pagination.dto"
-import { UTCDate } from "../../decorators/utc-date.decorator"
+import { Expose, Type } from 'class-transformer';
+import { IsDate,IsOptional } from 'class-validator';
+
+import { UTCDate } from '../../decorators/utc-date.decorator';
+import { PaginationDTO } from './pagination.dto';
 
 export class ProductFilterDTO extends PaginationDTO {
   // Các trường khác...
@@ -11,29 +12,28 @@ export class ProductFilterDTO extends PaginationDTO {
   @IsDate()
   @Type(() => Date)
   @UTCDate()
-  createdFrom?: Date
+  createdFrom?: Date;
 
   @Expose()
   @IsOptional()
   @IsDate()
   @Type(() => Date)
   @UTCDate()
-  createdTo?: Date
+  createdTo?: Date;
 
   @Expose()
   @IsOptional()
   @IsDate()
   @Type(() => Date)
   @UTCDate()
-  updatedFrom?: Date
+  updatedFrom?: Date;
 
   @Expose()
   @IsOptional()
   @IsDate()
   @Type(() => Date)
   @UTCDate()
-  updatedTo?: Date
+  updatedTo?: Date;
 
   // Các trường khác...
 }
-

@@ -1,10 +1,10 @@
-import type { NextFunction, Request, Response } from 'express';
-import { StatusCodes, ReasonPhrases } from 'http-status-codes';
 import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
+import type { NextFunction, Request, Response } from 'express';
+import { ReasonPhrases,StatusCodes } from 'http-status-codes';
 
-import { logger } from '../utils/logger';
 import { ErrorResponse } from '../utils/error.response';
+import { logger } from '../utils/logger';
 
 export const errorHandler = (
   err: Error,

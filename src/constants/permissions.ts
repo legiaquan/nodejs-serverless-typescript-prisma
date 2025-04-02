@@ -3,23 +3,23 @@
  */
 export enum Permission {
   // User permissions
-  VIEW_USERS = "view:users",
-  CREATE_USER = "create:user",
-  UPDATE_USER = "update:user",
-  DELETE_USER = "delete:user",
+  VIEW_USERS = 'view:users',
+  CREATE_USER = 'create:user',
+  UPDATE_USER = 'update:user',
+  DELETE_USER = 'delete:user',
 
   // Product permissions
-  VIEW_PRODUCTS = "view:products",
-  CREATE_PRODUCT = "create:product",
-  UPDATE_PRODUCT = "update:product",
-  DELETE_PRODUCT = "delete:product",
+  VIEW_PRODUCTS = 'view:products',
+  CREATE_PRODUCT = 'create:product',
+  UPDATE_PRODUCT = 'update:product',
+  DELETE_PRODUCT = 'delete:product',
 
   // Activity log permissions
-  VIEW_LOGS = "view:logs",
-  EXPORT_LOGS = "export:logs",
+  VIEW_LOGS = 'view:logs',
+  EXPORT_LOGS = 'export:logs',
 
   // Admin permissions
-  MANAGE_ALL = "manage:all",
+  MANAGE_ALL = 'manage:all',
 }
 
 /**
@@ -47,17 +47,16 @@ export const ROLE_PERMISSIONS = {
     Permission.DELETE_PRODUCT,
   ],
   guest: [Permission.VIEW_PRODUCTS],
-}
+};
 
 /**
  * Kiểm tra xem role có permission không
  */
 export const hasPermission = (role: string, permission: Permission): boolean => {
   // Admin có tất cả các quyền
-  if (role === "admin") return true
+  if (role === 'admin') return true;
 
   // Kiểm tra permission cụ thể
-  const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || []
-  return permissions.includes(permission) || permissions.includes(Permission.MANAGE_ALL)
-}
-
+  const permissions = ROLE_PERMISSIONS[role as keyof typeof ROLE_PERMISSIONS] || [];
+  return permissions.includes(permission) || permissions.includes(Permission.MANAGE_ALL);
+};

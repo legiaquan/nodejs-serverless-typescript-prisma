@@ -1,6 +1,7 @@
-import type { ActivityLog, Prisma } from "@prisma/client"
-import { BaseRepository } from "./base.repository"
-import prisma from "../lib/prisma"
+import type { ActivityLog, Prisma } from '@prisma/client';
+
+import prisma from '../lib/prisma';
+import { BaseRepository } from './base.repository';
 
 export class ActivityLogRepository extends BaseRepository<
   ActivityLog,
@@ -8,7 +9,7 @@ export class ActivityLogRepository extends BaseRepository<
   Prisma.ActivityLogUpdateInput
 > {
   constructor() {
-    super(prisma.activityLog, "ActivityLog")
+    super(prisma.activityLog, 'ActivityLog');
   }
 
   /**
@@ -32,11 +33,11 @@ export class ActivityLogRepository extends BaseRepository<
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -60,11 +61,11 @@ export class ActivityLogRepository extends BaseRepository<
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -88,11 +89,11 @@ export class ActivityLogRepository extends BaseRepository<
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -114,12 +115,11 @@ export class ActivityLogRepository extends BaseRepository<
           },
         },
         orderBy: {
-          createdAt: "desc",
+          createdAt: 'desc',
         },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }
-

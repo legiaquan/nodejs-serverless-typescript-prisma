@@ -4,11 +4,8 @@ module.exports = {
     project: 'tsconfig.json',
     sourceType: 'module',
     ecmaVersion: 2022,
-    ecmaFeatures: {
-      modules: true,
-    },
   },
-  plugins: ['@typescript-eslint/eslint-plugin', 'prettier', 'import', 'promise', 'jest'],
+  plugins: ['@typescript-eslint', 'prettier', 'import', 'promise', 'jest', 'unicorn'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -18,6 +15,7 @@ module.exports = {
     'plugin:import/typescript',
     'plugin:promise/recommended',
     'plugin:jest/recommended',
+    'plugin:unicorn/recommended',
     'prettier',
   ],
   root: true,
@@ -34,6 +32,8 @@ module.exports = {
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'prettier/prettier': 'error',
+    'unicorn/prevent-abbreviations': 'off',
+    'unicorn/filename-case': 'off',
     'import/order': [
       'error',
       {
@@ -42,9 +42,6 @@ module.exports = {
         alphabetize: { order: 'asc', caseInsensitive: true },
       },
     ],
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
-    'promise/always-return': 'warn',
-    'promise/catch-or-return': 'warn',
   },
   settings: {
     'import/resolver': {

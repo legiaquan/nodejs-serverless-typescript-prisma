@@ -1,7 +1,6 @@
 declare namespace Express {
   interface Request {
-    timezone?: string
+    timezone?: string;
     // Các properties khác...
   }
 }
-

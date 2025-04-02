@@ -5,17 +5,16 @@ export interface Loggable {
   /**
    * Get the entity type for activity logging
    */
-  getEntityType(): string
+  getEntityType(): string;
 
   /**
    * Get the entity ID for activity logging
    */
-  getEntityId(): number
+  getEntityId(): number;
 
   /**
    * Sanitize the entity for logging
    * This should return a clean object with only the fields that should be logged
    */
-  sanitizeForLog(): Record<string, any>
+  sanitizeForLog(): Record<string, any>;
 }
-

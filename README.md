@@ -53,27 +53,31 @@ A modern Node.js API template built with TypeScript, Serverless Framework, and P
 ## 🚀 Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone [repository-url]
    cd node-base
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env
    # Edit .env with your configuration
    ```
 
 4. **Database setup**
+
    ```bash
    # Start database
    docker-compose up -d
-   
+
    # Run migrations
    npm run prisma:migrate:dev
    ```
@@ -99,6 +103,7 @@ npm run test:watch
 ## 🔧 Development Workflow
 
 1. **Code Style**
+
    - ESLint for linting
    - Prettier for formatting
    - Husky for git hooks
@@ -126,6 +131,7 @@ npm run test:watch
 ## 🐳 Docker Support
 
 - Development environment:
+
   ```bash
   docker-compose up -d
   ```
@@ -183,8 +189,6 @@ This project is a serverless Node.js API built with TypeScript and Prisma ORM. I
 
 ## Source Code Structure
 
-
-
 - **Runtime**: Node.js (>=22.0.0)
 - **Framework**: Express.js
 - **Serverless**: Serverless Framework
@@ -205,23 +209,27 @@ This project is a serverless Node.js API built with TypeScript and Prisma ORM. I
 ## 🚀 Getting Started
 
 1. **Clone the repository**
+
    ```bash
    git clone [repository-url]
    cd node-base
    ```
 
 2. **Install dependencies**
+
    ```bash
    npm install
    ```
 
 3. **Set up environment variables**
+
    ```bash
    cp env.example .env
    # Edit .env with your configuration
    ```
 
 4. **Database setup**
+
    ```bash
    # Start database
    docker-compose up -d
@@ -251,6 +259,7 @@ npm run test:watch
 ## 🔧 Development Workflow
 
 1. **Code Style**
+
    - ESLint for linting
    - Prettier for formatting
    - Husky for git hooks
@@ -278,6 +287,7 @@ npm run test:watch
 ## 🐳 Docker Support
 
 - Development environment:
+
   ```bash
   docker-compose up -d
   ```

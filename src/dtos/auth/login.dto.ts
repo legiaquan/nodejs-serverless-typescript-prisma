@@ -1,5 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator"
-import { Expose } from "class-transformer"
+import { Expose } from 'class-transformer';
+import { IsEmail, IsNotEmpty, IsString, MinLength } from 'class-validator';
 
 /**
  * @swagger
@@ -24,14 +24,13 @@ import { Expose } from "class-transformer"
  */
 export class LoginDTO {
   @Expose()
-  @IsNotEmpty({ message: "Email is required" })
-  @IsEmail({}, { message: "Invalid email format" })
-  email: string
+  @IsNotEmpty({ message: 'Email is required' })
+  @IsEmail({}, { message: 'Invalid email format' })
+  email: string;
 
   @Expose()
-  @IsNotEmpty({ message: "Password is required" })
-  @IsString({ message: "Password must be a string" })
-  @MinLength(6, { message: "Password must be at least 6 characters" })
-  password: string
+  @IsNotEmpty({ message: 'Password is required' })
+  @IsString({ message: 'Password must be a string' })
+  @MinLength(6, { message: 'Password must be at least 6 characters' })
+  password: string;
 }
-

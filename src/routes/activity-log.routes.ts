@@ -1,11 +1,12 @@
-import { Router } from "express"
-import { ActivityLogController } from "../controllers/activity-log.controller"
-import { asyncHandler } from "../middleware/global-error-handler"
-import { authenticate, requirePermission } from "../middleware/auth.middleware"
-import { Permission } from "../constants/permissions"
+import { Router } from 'express';
 
-const router = Router()
-const activityLogController = new ActivityLogController()
+import { Permission } from '../constants/permissions';
+import { ActivityLogController } from '../controllers/activity-log.controller';
+import { authenticate, requirePermission } from '../middleware/auth.middleware';
+import { asyncHandler } from '../middleware/global-error-handler';
+
+const router = Router();
+const activityLogController = new ActivityLogController();
 
 /**
  * @swagger
@@ -65,11 +66,11 @@ const activityLogController = new ActivityLogController()
  *         description: Forbidden - insufficient permissions
  */
 router.get(
-  "/recent",
+  '/recent',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
-  asyncHandler(activityLogController.getRecentLogs),
-)
+  asyncHandler(activityLogController.getRecentLogs)
+);
 
 /**
  * @swagger
@@ -98,11 +99,11 @@ router.get(
  *         description: Forbidden - insufficient permissions
  */
 router.get(
-  "/user/:userId",
+  '/user/:userId',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
-  asyncHandler(activityLogController.getUserLogs),
-)
+  asyncHandler(activityLogController.getUserLogs)
+);
 
 /**
  * @swagger
@@ -137,11 +138,11 @@ router.get(
  *         description: Forbidden - insufficient permissions
  */
 router.get(
-  "/entity/:entityType/:entityId",
+  '/entity/:entityType/:entityId',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
-  asyncHandler(activityLogController.getEntityLogs),
-)
+  asyncHandler(activityLogController.getEntityLogs)
+);
 
 /**
  * @swagger
@@ -210,7 +211,11 @@ router.get(
  *       403:
  *         description: Forbidden - insufficient permissions
  */
-router.get("/", authenticate, requirePermission(Permission.VIEW_USERS), asyncHandler(activityLogController.getLogs))
+router.get(
+  '/',
+  authenticate,
+  requirePermission(Permission.VIEW_USERS),
+  asyncHandler(activityLogController.getLogs)
+);
 
-export default router
-
+export default router;

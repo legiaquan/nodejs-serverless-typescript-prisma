@@ -1,5 +1,5 @@
-import { IsOptional, IsInt, Min, Max } from "class-validator"
-import { Expose, Type } from "class-transformer"
+import { Expose, Type } from 'class-transformer';
+import { IsInt, IsOptional, Max,Min } from 'class-validator';
 
 /**
  * @swagger
@@ -72,21 +72,20 @@ import { Expose, Type } from "class-transformer"
 export class PaginationDTO {
   @Expose()
   @IsOptional()
-  @IsInt({ message: "Page must be an integer" })
-  @Min(1, { message: "Page must be greater than or equal to 1" })
+  @IsInt({ message: 'Page must be an integer' })
+  @Min(1, { message: 'Page must be greater than or equal to 1' })
   @Type(() => Number)
-  page?: number = 1
+  page?: number = 1;
 
   @Expose()
   @IsOptional()
-  @IsInt({ message: "Limit must be an integer" })
-  @Min(1, { message: "Limit must be greater than or equal to 1" })
-  @Max(100, { message: "Limit must be less than or equal to 100" })
+  @IsInt({ message: 'Limit must be an integer' })
+  @Min(1, { message: 'Limit must be greater than or equal to 1' })
+  @Max(100, { message: 'Limit must be less than or equal to 100' })
   @Type(() => Number)
-  limit?: number = 10
+  limit?: number = 10;
 
   get skip(): number {
-    return (this.page - 1) * this.limit
+    return (this.page - 1) * this.limit;
   }
 }
-

@@ -1,36 +1,37 @@
-import type { Product } from "@prisma/client"
-import type { Loggable } from "../interfaces/loggable.interface"
-import { EntityType } from "../services/activity-log.service"
+import type { Product } from '@prisma/client';
+
+import type { Loggable } from '../interfaces/loggable.interface';
+import { EntityType } from '../services/activity-log.service';
 
 /**
  * Product model that implements Loggable interface
  */
 export class ProductModel implements Loggable {
-  private product: Product
+  private product: Product;
 
   constructor(product: Product) {
-    this.product = product
+    this.product = product;
   }
 
   /**
    * Get the entity type for activity logging
    */
   getEntityType(): string {
-    return EntityType.PRODUCT
+    return EntityType.PRODUCT;
   }
 
   /**
    * Get the entity ID for activity logging
    */
   getEntityId(): number {
-    return this.product.id
+    return this.product.id;
   }
 
   /**
    * Sanitize the product for logging
    */
   sanitizeForLog(): Record<string, any> {
-    const { id, name, description, price, stock, createdBy, createdAt, updatedAt } = this.product
+    const { id, name, description, price, stock, createdBy, createdAt, updatedAt } = this.product;
     return {
       id,
       name,
@@ -40,14 +41,13 @@ export class ProductModel implements Loggable {
       createdBy,
       createdAt: createdAt.toISOString(),
       updatedAt: updatedAt.toISOString(),
-    }
+    };
   }
 
   /**
    * Get the underlying product
    */
   getProduct(): Product {
-    return this.product
+    return this.product;
   }
 }
-

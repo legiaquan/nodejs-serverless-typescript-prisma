@@ -1,8 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 
-import { logger } from '../utils/logger';
 import { ErrorResponse } from '../utils/error.response';
+import { logger } from '../utils/logger';
 
 /**
  * Async handler to catch errors in async route handlers

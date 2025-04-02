@@ -1,114 +1,114 @@
-import type { Request, Response } from "express"
+import type { Request, Response } from 'express';
 
-import { UserService } from "../services/user.service"
-import { NotFoundError } from "../utils/error.response"
-import { OkResponse, CreatedResponse } from "../utils/success.response"
-import type { CreateUserDTO } from "../dtos/user/create-user.dto"
-import type { UpdateUserDTO } from "../dtos/user/update-user.dto"
-import type { SearchDTO } from "../dtos/query/search.dto"
-import type { IdParamDTO } from "../dtos/params/id-param.dto"
-import type { RoleParamDTO } from "../dtos/params/role-param.dto"
+import type { IdParamDTO as IdParameterDTO } from '../dtos/params/id-param.dto';
+import type { RoleParamDTO as RoleParameterDTO } from '../dtos/params/role-param.dto';
+import type { SearchDTO } from '../dtos/query/search.dto';
+import type { CreateUserDTO } from '../dtos/user/create-user.dto';
+import type { UpdateUserDTO } from '../dtos/user/update-user.dto';
+import { UserService } from '../services/user.service';
+import { NotFoundError } from '../utils/error.response';
+import { CreatedResponse, OkResponse } from '../utils/success.response';
 
 export class UserController {
-  private userService: UserService
+  private userService: UserService;
 
   constructor() {
-    this.userService = new UserService()
+    this.userService = new UserService();
   }
 
   // Update getAllUsers to use pagination
   getAllUsers = async (req: Request, res: Response) => {
-    const page = req.query.page ? Number.parseInt(req.query.page as string) : 1
-    const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : 10
+    const page = req.query.page ? Number.parseInt(req.query.page as string) : 1;
+    const limit = req.query.limit ? Number.parseInt(req.query.limit as string) : 10;
 
-    const result = await this.userService.getAllUsers({ page, limit })
+    const result = await this.userService.getAllUsers({ page, limit });
 
     new OkResponse({
-      message: "Users retrieved successfully",
+      message: 'Users retrieved successfully',
       metadata: {
         data: result.data,
         total: result.total,
         pagination: result.pagination,
       },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   getUserById = async (req: Request, res: Response) => {
-    const { id } = req.params as unknown as IdParamDTO
+    const { id } = req.params as unknown as IdParameterDTO;
 
-    const user = await this.userService.getUserById(id)
+    const user = await this.userService.getUserById(id);
 
     if (!user) {
-      throw new NotFoundError("User not found")
+      throw new NotFoundError('User not found');
     }
 
     new OkResponse({
-      message: "User retrieved successfully",
+      message: 'User retrieved successfully',
       metadata: { data: user },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   createUser = async (req: Request, res: Response) => {
-    const userData = req.body as CreateUserDTO
-    const newUser = await this.userService.createUser(userData)
+    const userData = req.body as CreateUserDTO;
+    const newUser = await this.userService.createUser(userData);
 
     new CreatedResponse({
-      message: "User created successfully",
+      message: 'User created successfully',
       metadata: { data: newUser },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   updateUser = async (req: Request, res: Response) => {
-    const { id } = req.params as unknown as IdParamDTO
-    const userData = req.body as UpdateUserDTO
+    const { id } = req.params as unknown as IdParameterDTO;
+    const userData = req.body as UpdateUserDTO;
 
-    const updatedUser = await this.userService.updateUser(id, userData)
+    const updatedUser = await this.userService.updateUser(id, userData);
 
     if (!updatedUser) {
-      throw new NotFoundError("User not found")
+      throw new NotFoundError('User not found');
     }
 
     new OkResponse({
-      message: "User updated successfully",
+      message: 'User updated successfully',
       metadata: { data: updatedUser },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   deleteUser = async (req: Request, res: Response) => {
-    const { id } = req.params as unknown as IdParamDTO
+    const { id } = req.params as unknown as IdParameterDTO;
 
-    const result = await this.userService.deleteUser(id)
+    const result = await this.userService.deleteUser(id);
 
     if (!result) {
-      throw new NotFoundError("User not found")
+      throw new NotFoundError('User not found');
     }
 
     new OkResponse({
-      message: "User deleted successfully",
+      message: 'User deleted successfully',
       metadata: { success: true },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   searchUsers = async (req: Request, res: Response) => {
-    const { query, page, limit } = req.query as unknown as SearchDTO
+    const { query, page, limit } = req.query as unknown as SearchDTO;
 
-    const users = await this.userService.searchUsers(query)
+    const users = await this.userService.searchUsers(query);
 
     new OkResponse({
-      message: "Users search completed",
+      message: 'Users search completed',
       metadata: {
         data: users,
         count: users.length,
         query,
         pagination: { page, limit },
       },
-    }).send(res)
-  }
+    }).send(res);
+  };
 
   getUsersByRole = async (req: Request, res: Response) => {
-    const { role } = req.params as unknown as RoleParamDTO
+    const { role } = req.params as unknown as RoleParameterDTO;
 
-    const users = await this.userService.getUsersByRole(role)
+    const users = await this.userService.getUsersByRole(role);
 
     new OkResponse({
       message: `Users with role '${role}' retrieved successfully`,
@@ -117,7 +117,6 @@ export class UserController {
         count: users.length,
         role,
       },
-    }).send(res)
-  }
+    }).send(res);
+  };
 }
-

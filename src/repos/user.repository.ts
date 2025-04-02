@@ -1,10 +1,15 @@
-import type { Prisma, User } from "@prisma/client"
-import { BaseRepository } from "./base.repository"
-import prisma from "../lib/prisma"
+import type { Prisma, User } from '@prisma/client';
 
-export class UserRepository extends BaseRepository<User, Prisma.UserCreateInput, Prisma.UserUpdateInput> {
+import prisma from '../lib/prisma';
+import { BaseRepository } from './base.repository';
+
+export class UserRepository extends BaseRepository<
+  User,
+  Prisma.UserCreateInput,
+  Prisma.UserUpdateInput
+> {
   constructor() {
-    super(prisma.user, "User")
+    super(prisma.user, 'User');
   }
 
   /**
@@ -14,9 +19,9 @@ export class UserRepository extends BaseRepository<User, Prisma.UserCreateInput,
     try {
       return await this.model.findUnique({
         where: { email },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -27,9 +32,9 @@ export class UserRepository extends BaseRepository<User, Prisma.UserCreateInput,
     try {
       return await this.model.findMany({
         where: { role },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 
@@ -42,10 +47,9 @@ export class UserRepository extends BaseRepository<User, Prisma.UserCreateInput,
         where: {
           OR: [{ name: { contains: query } }, { email: { contains: query } }],
         },
-      })
+      });
     } catch (error) {
-      throw error
+      throw error;
     }
   }
 }
-

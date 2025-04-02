@@ -1,15 +1,15 @@
-import { Router } from "express"
+import { Router } from 'express';
 
-import { AuthController } from "../controllers/auth.controller"
-import { validateBody } from "../middleware/validation.middleware"
-import { LoginDTO } from "../dtos/auth/login.dto"
-import { RegisterDTO } from "../dtos/auth/register.dto"
-import { authenticate } from "../middleware/auth.middleware"
-import { asyncHandler } from "../middleware/global-error-handler"
-import { authRateLimiter } from "../middleware/rate-limit.middleware"
+import { AuthController } from '../controllers/auth.controller';
+import { LoginDTO } from '../dtos/auth/login.dto';
+import { RegisterDTO } from '../dtos/auth/register.dto';
+import { authenticate } from '../middleware/auth.middleware';
+import { asyncHandler } from '../middleware/global-error-handler';
+import { authRateLimiter } from '../middleware/rate-limit.middleware';
+import { validateBody } from '../middleware/validation.middleware';
 
-const router = Router()
-const authController = new AuthController()
+const router = Router();
+const authController = new AuthController();
 
 /**
  * @swagger
@@ -64,7 +64,12 @@ const authController = new AuthController()
  *       429:
  *         description: Too many requests
  */
-router.post("/register", authRateLimiter, validateBody(RegisterDTO), asyncHandler(authController.register))
+router.post(
+  '/register',
+  authRateLimiter,
+  validateBody(RegisterDTO),
+  asyncHandler(authController.register)
+);
 
 /**
  * @swagger
@@ -121,7 +126,7 @@ router.post("/register", authRateLimiter, validateBody(RegisterDTO), asyncHandle
  *       429:
  *         description: Too many requests
  */
-router.post("/login", authRateLimiter, validateBody(LoginDTO), asyncHandler(authController.login))
+router.post('/login', authRateLimiter, validateBody(LoginDTO), asyncHandler(authController.login));
 
 /**
  * @swagger
@@ -167,7 +172,6 @@ router.post("/login", authRateLimiter, validateBody(LoginDTO), asyncHandler(auth
  *       401:
  *         description: Unauthorized - invalid or missing token
  */
-router.get("/me", authenticate, asyncHandler(authController.getCurrentUser))
+router.get('/me', authenticate, asyncHandler(authController.getCurrentUser));
 
-export default router
-
+export default router;

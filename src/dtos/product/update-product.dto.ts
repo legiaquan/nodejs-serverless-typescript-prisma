@@ -1,5 +1,5 @@
-import { IsOptional, IsString, Length, IsNumber, Min, IsDecimal } from "class-validator"
-import { Expose, Type } from "class-transformer"
+import { Expose, Type } from 'class-transformer';
+import { IsDecimal,IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 /**
  * @swagger
@@ -29,27 +29,29 @@ import { Expose, Type } from "class-transformer"
 export class UpdateProductDTO {
   @Expose()
   @IsOptional()
-  @IsString({ message: "Name must be a string" })
-  @Length(2, 100, { message: "Name must be between 2 and 100 characters" })
-  name?: string
+  @IsString({ message: 'Name must be a string' })
+  @Length(2, 100, { message: 'Name must be between 2 and 100 characters' })
+  name?: string;
 
   @Expose()
   @IsOptional()
-  @IsString({ message: "Description must be a string" })
-  description?: string
+  @IsString({ message: 'Description must be a string' })
+  description?: string;
 
   @Expose()
   @IsOptional()
-  @IsDecimal({ decimal_digits: "0,2" }, { message: "Price must be a decimal with at most 2 decimal places" })
+  @IsDecimal(
+    { decimal_digits: '0,2' },
+    { message: 'Price must be a decimal with at most 2 decimal places' }
+  )
   @Type(() => Number)
-  @Min(0, { message: "Price must be greater than or equal to 0" })
-  price?: number
+  @Min(0, { message: 'Price must be greater than or equal to 0' })
+  price?: number;
 
   @Expose()
   @IsOptional()
-  @IsNumber({}, { message: "Stock must be a number" })
+  @IsNumber({}, { message: 'Stock must be a number' })
   @Type(() => Number)
-  @Min(0, { message: "Stock must be greater than or equal to 0" })
-  stock?: number
+  @Min(0, { message: 'Stock must be greater than or equal to 0' })
+  stock?: number;
 }
-

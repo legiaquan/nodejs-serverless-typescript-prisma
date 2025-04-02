@@ -1,6 +1,6 @@
+import { afterAll,beforeAll } from '@jest/globals';
 import dotenv from 'dotenv';
 import path from 'path';
-import { beforeAll, afterAll } from '@jest/globals';
 
 // Load test environment variables
 dotenv.config({ path: path.resolve(__dirname, '../.env.test') });

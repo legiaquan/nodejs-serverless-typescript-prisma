@@ -1,18 +1,18 @@
-import { Router } from "express"
+import { Router } from 'express';
 
-import { UserController } from "../controllers/user.controller"
-import { validateBody, validateParams, validateQuery } from "../middleware/validation.middleware"
-import { CreateUserDTO } from "../dtos/user/create-user.dto"
-import { UpdateUserDTO } from "../dtos/user/update-user.dto"
-import { IdParamDTO } from "../dtos/params/id-param.dto"
-import { SearchDTO } from "../dtos/query/search.dto"
-import { RoleParamDTO } from "../dtos/params/role-param.dto"
-import { asyncHandler } from "../middleware/global-error-handler"
-import { authenticate, requirePermission } from "../middleware/auth.middleware"
-import { Permission } from "../constants/permissions"
+import { Permission } from '../constants/permissions';
+import { UserController } from '../controllers/user.controller';
+import { IdParamDTO } from '../dtos/params/id-param.dto';
+import { RoleParamDTO } from '../dtos/params/role-param.dto';
+import { SearchDTO } from '../dtos/query/search.dto';
+import { CreateUserDTO } from '../dtos/user/create-user.dto';
+import { UpdateUserDTO } from '../dtos/user/update-user.dto';
+import { authenticate, requirePermission } from '../middleware/auth.middleware';
+import { asyncHandler } from '../middleware/global-error-handler';
+import { validateBody, validateParams, validateQuery } from '../middleware/validation.middleware';
 
-const router = Router()
-const userController = new UserController()
+const router = Router();
+const userController = new UserController();
 
 /**
  * @swagger
@@ -54,7 +54,12 @@ const userController = new UserController()
  *       403:
  *         description: Forbidden - insufficient permissions
  */
-router.get("/", authenticate, requirePermission(Permission.VIEW_USERS), asyncHandler(userController.getAllUsers))
+router.get(
+  '/',
+  authenticate,
+  requirePermission(Permission.VIEW_USERS),
+  asyncHandler(userController.getAllUsers)
+);
 
 /**
  * @swagger
@@ -96,12 +101,12 @@ router.get("/", authenticate, requirePermission(Permission.VIEW_USERS), asyncHan
  *         description: Forbidden - insufficient permissions
  */
 router.get(
-  "/search",
+  '/search',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
   validateQuery(SearchDTO),
-  asyncHandler(userController.searchUsers),
-)
+  asyncHandler(userController.searchUsers)
+);
 
 /**
  * @swagger
@@ -128,12 +133,12 @@ router.get(
  *         description: Forbidden - insufficient permissions
  */
 router.get(
-  "/role/:role",
+  '/role/:role',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
   validateParams(RoleParamDTO),
-  asyncHandler(userController.getUsersByRole),
-)
+  asyncHandler(userController.getUsersByRole)
+);
 
 /**
  * @swagger
@@ -162,12 +167,12 @@ router.get(
  *         description: User not found
  */
 router.get(
-  "/:id",
+  '/:id',
   authenticate,
   requirePermission(Permission.VIEW_USERS),
   validateParams(IdParamDTO),
-  asyncHandler(userController.getUserById),
-)
+  asyncHandler(userController.getUserById)
+);
 
 /**
  * @swagger
@@ -195,12 +200,12 @@ router.get(
  *         description: Forbidden - insufficient permissions
  */
 router.post(
-  "/",
+  '/',
   authenticate,
   requirePermission(Permission.CREATE_USER),
   validateBody(CreateUserDTO),
-  asyncHandler(userController.createUser),
-)
+  asyncHandler(userController.createUser)
+);
 
 /**
  * @swagger
@@ -237,13 +242,13 @@ router.post(
  *         description: User not found
  */
 router.put(
-  "/:id",
+  '/:id',
   authenticate,
   requirePermission(Permission.UPDATE_USER),
   validateParams(IdParamDTO),
   validateBody(UpdateUserDTO),
-  asyncHandler(userController.updateUser),
-)
+  asyncHandler(userController.updateUser)
+);
 
 /**
  * @swagger
@@ -272,12 +277,11 @@ router.put(
  *         description: User not found
  */
 router.delete(
-  "/:id",
+  '/:id',
   authenticate,
   requirePermission(Permission.DELETE_USER),
   validateParams(IdParamDTO),
-  asyncHandler(userController.deleteUser),
-)
+  asyncHandler(userController.deleteUser)
+);
 
-export default router
-
+export default router;
