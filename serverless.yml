@@ -1,0 +1,34 @@
+service: nodejs-serverless-typescript-prisma
+
+frameworkVersion: '3'
+
+plugins:
+  - serverless-plugin-typescript
+  - serverless-offline
+  - serverless-dotenv-plugin
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'us-east-1'}
+  environment:
+    NODE_ENV: ${opt:stage, 'dev'}
+    DATABASE_URL: ${env:DATABASE_URL}
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    lambdaPort: 3002
+  dotenv:
+    path: ./.env
+
+functions:
+  api:
+    handler: src/handler.handler
+    events:
+      - http:
+          path: /{proxy+}
+          method: any
+          cors: true
+

@@ -1,0 +1,71 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(100)
+  email     String   @unique @db.VarChar(100)
+  password  String   @db.VarChar(255)
+  role      String   @default("user") @db.VarChar(50)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  products  Product[]
+  activityLogs ActivityLog[] @relation("UserActivityLogs")
+  actionsPerformed ActivityLog[] @relation("UserActions")
+
+  @@map("users")
+}
+
+model Product {
+  id          Int      @id @default(autoincrement())
+  name        String   @db.VarChar(100)
+  description String?  @db.Text
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  createdBy   Int      @map("created_by")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+  
+  // Relation to User
+  user        User     @relation(fields: [createdBy], references: [id])
+  
+  // Relation to ActivityLog
+  activityLogs ActivityLog[] @relation("ProductLogs")
+
+  @@map("products")
+}
+
+model ActivityLog {
+  id          Int      @id @default(autoincrement())
+  entityType  String   @db.VarChar(50) // 'product', 'user', 'order', etc.
+  entityId    Int      // ID of the entity being modified
+  action      String   @db.VarChar(50) // 'create', 'update', 'delete', 'view', etc.
+  userId      Int      // User who performed the action
+  changes     Json?    // JSON containing the changes (before/after)
+  metadata    Json?    // Additional metadata
+  createdAt   DateTime @default(now()) @map("created_at")
+  
+  // Relations - using named relations for clarity
+  user        User     @relation("UserActions", fields: [userId], references: [id])
+  
+  // Optional relations to specific entities
+  // These are used only when the entityType matches
+  product     Product? @relation("ProductLogs", fields: [entityId], references: [id], map: "product_logs_fk")
+  userEntity  User?    @relation("UserActivityLogs", fields: [entityId], references: [id], map: "user_logs_fk")
+
+  @@index([entityType, entityId])
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@map("activity_logs")
+}
+

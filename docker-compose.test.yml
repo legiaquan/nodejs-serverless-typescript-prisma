@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  # Test database
+  mysql-test:
+    build:
+      context: .
+      dockerfile: ./dockers/mysql/Dockerfile
+    container_name: nodejs-serverless-mysql-test
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-serverless_test_db}
+      MYSQL_USER: ${MYSQL_USER:-testuser}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-testpassword}
+      TZ: UTC
+    ports:
+      - "${MYSQL_PORT:-3307}:3306"
+    volumes:
+      - mysql_test_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+
+volumes:
+  mysql_test_data:

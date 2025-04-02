@@ -1,0 +1,60 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.npm/
+
+# Build output
+dist/
+build/
+.serverless/
+.webpack/
+*.tsbuildinfo
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+# Keep templates
+!.env.docker
+!.env.test
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Testing
+coverage/
+.nyc_output/
+
+# IDE
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.code-workspace
+.DS_Store
+
+# Prisma
+prisma/.env
+
+# Temporary files
+tmp/
+temp/
+.tmp/
+
+# Docker volumes (optional, depending on your workflow)
+# docker-volumes/
+
+# Swagger
+swagger.json
+swagger.yaml
+
+# Misc
+.DS_Store
+Thumbs.db

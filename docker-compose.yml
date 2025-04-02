@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  # Node.js application environment
+  app:
+    build:
+      context: .
+      dockerfile: ./dockers/node/Dockerfile
+    container_name: nodejs-serverless-app
+    volumes:
+      - .:/app
+      - node_modules:/app/node_modules
+    ports:
+      - "${PORT:-3000}:${PORT:-3000}"
+    env_file:
+      - .env
+    depends_on:
+      - mysql
+    networks:
+      - app-network
+
+  # MySQL database
+  mysql:
+    build:
+      context: .
+      dockerfile: ./dockers/mysql/Dockerfile
+    container_name: nodejs-serverless-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-serverless_db}
+      MYSQL_USER: ${MYSQL_USER:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
+      TZ: UTC
+    ports:
+      - "${MYSQL_PORT:-3306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  node_modules:
+  mysql_data:
