@@ -1,8 +1,14 @@
 import type { Request, Response } from 'express';
 
+import type { ActivityLogFilterOptions } from '../interfaces/activity-log.interface';
 import { ActivityLogService } from '../services/activity-log.service';
 import { BadRequestError } from '../utils/error.response';
 import { OkResponse } from '../utils/success.response';
+
+interface LogFilterOptions extends ActivityLogFilterOptions {
+  page?: number;
+  limit?: number;
+}
 
 export class ActivityLogController {
   private activityLogService: ActivityLogService;
@@ -14,7 +20,7 @@ export class ActivityLogController {
   /**
    * Get recent activity logs
    */
-  getRecentLogs = async (req: Request, res: Response) => {
+  getRecentLogs = async (req: Request, res: Response): Promise<void> => {
     const limit = req.query.limit ? Number.parseInt(req.query.limit as string, 10) : 50;
 
     if (isNaN(limit) || limit <= 0 || limit > 1000) {
@@ -36,7 +42,7 @@ export class ActivityLogController {
   /**
    * Get activity logs for a specific user
    */
-  getUserLogs = async (req: Request, res: Response) => {
+  getUserLogs = async (req: Request, res: Response): Promise<void> => {
     const userId = Number.parseInt(req.params.userId, 10);
 
     if (isNaN(userId) || userId <= 0) {
@@ -58,7 +64,7 @@ export class ActivityLogController {
   /**
    * Get activity logs for a specific entity
    */
-  getEntityLogs = async (req: Request, res: Response) => {
+  getEntityLogs = async (req: Request, res: Response): Promise<void> => {
     const entityType = req.params.entityType;
     const entityId = Number.parseInt(req.params.entityId, 10);
 
@@ -86,11 +92,11 @@ export class ActivityLogController {
   /**
    * Get activity logs with filtering
    */
-  getLogs = async (req: Request, res: Response) => {
+  getLogs = async (req: Request, res: Response): Promise<void> => {
     const { entityType, entityId, action, userId, startDate, endDate, page, limit } = req.query;
 
     // Parse and validate query parameters
-    const options: any = {};
+    const options: LogFilterOptions = {};
 
     if (entityType) {
       options.entityType = entityType as string;
@@ -148,14 +154,14 @@ export class ActivityLogController {
       options.limit = parsedLimit;
     }
 
-    const { logs, total } = await this.activityLogService.getLogs(options);
+    const result = await this.activityLogService.getLogs(options);
 
     new OkResponse({
       message: 'Activity logs retrieved successfully',
       metadata: {
-        data: logs,
-        count: logs.length,
-        total,
+        data: result.data,
+        count: result.data.length,
+        total: result.total,
         page: options.page || 1,
         limit: options.limit || 50,
         filters: {

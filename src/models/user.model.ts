@@ -30,6 +30,7 @@ export class UserModel implements Loggable {
   /**
    * Sanitize the user for logging
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sanitizeForLog(): Record<string, any> {
     const { id, name, email, role, createdAt, updatedAt } = this.user;
     return {

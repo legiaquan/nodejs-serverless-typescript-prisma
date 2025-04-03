@@ -50,7 +50,7 @@ export class UserController {
 
   createUser = async (req: Request, res: Response) => {
     const userData = req.body as CreateUserDTO;
-    const newUser = await this.userService.createUser(userData);
+    const newUser = await this.userService.createUser(userData, req.user!.id);
 
     new CreatedResponse({
       message: 'User created successfully',
@@ -62,7 +62,7 @@ export class UserController {
     const { id } = req.params as unknown as IdParameterDTO;
     const userData = req.body as UpdateUserDTO;
 
-    const updatedUser = await this.userService.updateUser(id, userData);
+    const updatedUser = await this.userService.updateUser(id, userData, req.user!.id);
 
     if (!updatedUser) {
       throw new NotFoundError('User not found');
@@ -77,7 +77,8 @@ export class UserController {
   deleteUser = async (req: Request, res: Response) => {
     const { id } = req.params as unknown as IdParameterDTO;
 
-    const result = await this.userService.deleteUser(id);
+    // The authenticate middleware guarantees req.user exists
+    const result = await this.userService.deleteUser(id, req.user!.id);
 
     if (!result) {
       throw new NotFoundError('User not found');

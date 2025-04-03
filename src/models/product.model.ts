@@ -30,6 +30,7 @@ export class ProductModel implements Loggable {
   /**
    * Sanitize the product for logging
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sanitizeForLog(): Record<string, any> {
     const { id, name, description, price, stock, createdBy, createdAt, updatedAt } = this.product;
     return {

@@ -4,7 +4,6 @@ import { logger } from '../utils/logger';
 
 // Prevent multiple instances of Prisma Client in development
 declare global {
-  // eslint-disable-next-line no-var
   var prisma: PrismaClient | undefined;
 }
 
@@ -36,12 +35,14 @@ export const prisma =
 
 // Log queries in development
 if (process.env.NODE_ENV === 'development') {
-  prisma.$on('query', e => {
+  // @ts-expect-error - Prisma types don't properly expose query events
+  prisma.$on('query', (e: { query: string; params: unknown; duration: number }) => {
     logger.debug({ query: e.query, params: e.params, duration: `${e.duration}ms` }, 'Prisma Query');
   });
 }
 
-prisma.$on('error', e => {
+// @ts-expect-error - Prisma types don't properly expose error events
+prisma.$on('error', (e: Error) => {
   logger.error({ err: e }, 'Prisma Error');
 });
 

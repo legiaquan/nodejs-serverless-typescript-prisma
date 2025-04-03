@@ -14,13 +14,13 @@ export const defaultRateLimiter = rateLimit({
   standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
   legacyHeaders: false, // Disable the `X-RateLimit-*` headers
   message: 'Too many requests, please try again after 5 minutes',
-  handler: (req: Request, res: Response) => {
+  handler: (req: Request, _res: Response) => {
     logger.warn({ ip: req.ip }, 'Rate limit exceeded');
     throw new TooManyRequestsError('Too many requests, please try again after 5 minutes');
   },
-  keyGenerator: (req: Request) => {
+  keyGenerator: (req: Request): string => {
     // Use IP address as the key
-    return req.ip;
+    return req.ip || req.socket.remoteAddress || 'unknown-ip';
   },
   skip: (req: Request) => {
     // Skip rate limiting for health check endpoint
@@ -38,19 +38,18 @@ export const authRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: 'Too many authentication attempts, please try again after 15 minutes',
-  handler: (req: Request, res: Response) => {
-    logger.warn(
-      { ip: req.ip, email: req.body.email || 'unknown' },
-      'Authentication rate limit exceeded'
-    );
+  handler: (req: Request, _res: Response) => {
+    const email = ((req.body as Record<string, unknown>).email as string) || 'unknown';
+
+    logger.warn({ ip: req.ip, email }, 'Authentication rate limit exceeded');
     throw new TooManyRequestsError(
       'Too many authentication attempts, please try again after 15 minutes'
     );
   },
-  keyGenerator: (req: Request) => {
+  keyGenerator: (req: Request): string => {
     // Use IP address as the key
     // For more security, you could combine IP with username/email
-    const email = req.body.email || 'unknown';
-    return `${req.ip}-${email}`;
+    const email = ((req.body as Record<string, unknown>).email as string) || 'unknown';
+    return `${req.ip || req.socket.remoteAddress || 'unknown-ip'}-${email}`;
   },
 });

@@ -1,9 +1,14 @@
-import type { Prisma, Product } from '@prisma/client';
+import { Prisma, type Product } from '@prisma/client';
 
-import { type ProductFilterDTO, ProductSortField } from '../dtos/query/product-filter.dto';
-import prisma from '../lib/prisma';
-import { toUTC } from '../utils/date.utils';
 import { BaseRepository } from './base.repository';
+import {
+  type ProductFilterDTO,
+  ProductSortField,
+  SortOrder,
+} from '../dtos/query/product-filter.dto';
+import prisma from '../lib/prisma';
+import { toUTC } from '../utils/date.util';
+import { logger } from '../utils/logger';
 
 export class ProductRepository extends BaseRepository<
   Product,
@@ -73,8 +78,8 @@ export class ProductRepository extends BaseRepository<
       if (filter.name) {
         where.name = {
           contains: filter.name,
-          mode: 'insensitive',
-        };
+          mode: Prisma.QueryMode.insensitive,
+        } as Prisma.StringFilter<'Product'>;
       }
 
       // Creator filter
@@ -88,23 +93,23 @@ export class ProductRepository extends BaseRepository<
       // Map sort field to Prisma field
       switch (filter.sortBy) {
         case ProductSortField.ID:
-          orderBy.id = filter.sortOrder;
+          orderBy.id = filter.sortOrder || SortOrder.DESC;
           break;
         case ProductSortField.NAME:
-          orderBy.name = filter.sortOrder;
+          orderBy.name = filter.sortOrder || SortOrder.DESC;
           break;
         case ProductSortField.PRICE:
-          orderBy.price = filter.sortOrder;
+          orderBy.price = filter.sortOrder || SortOrder.DESC;
           break;
         case ProductSortField.STOCK:
-          orderBy.stock = filter.sortOrder;
+          orderBy.stock = filter.sortOrder || SortOrder.DESC;
           break;
         case ProductSortField.UPDATED_AT:
-          orderBy.updatedAt = filter.sortOrder;
+          orderBy.updatedAt = filter.sortOrder || SortOrder.DESC;
           break;
         case ProductSortField.CREATED_AT:
         default:
-          orderBy.createdAt = filter.sortOrder;
+          orderBy.createdAt = filter.sortOrder || SortOrder.DESC;
       }
 
       // Get total count for pagination
@@ -115,7 +120,7 @@ export class ProductRepository extends BaseRepository<
         where,
         orderBy,
         skip: filter.skip,
-        take: filter.limit,
+        take: typeof filter.limit === 'string' ? parseInt(filter.limit, 10) : filter.limit,
         include: {
           user: {
             select: {
@@ -129,7 +134,14 @@ export class ProductRepository extends BaseRepository<
       });
 
       return { data, total };
-    } catch (error) {
+    } catch (error: unknown) {
+      logger.error(
+        {
+          err: error instanceof Error ? error : new Error(String(error)),
+          filter,
+        },
+        'Error finding products with filters'
+      );
       throw error;
     }
   }
@@ -147,7 +159,15 @@ export class ProductRepository extends BaseRepository<
           },
         },
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      logger.error(
+        {
+          err: error instanceof Error ? error : new Error(String(error)),
+          minPrice,
+          maxPrice,
+        },
+        'Error finding products by price range'
+      );
       throw error;
     }
   }
@@ -164,7 +184,14 @@ export class ProductRepository extends BaseRepository<
           },
         },
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      logger.error(
+        {
+          err: error instanceof Error ? error : new Error(String(error)),
+          threshold,
+        },
+        'Error finding low stock products'
+      );
       throw error;
     }
   }
@@ -176,10 +203,30 @@ export class ProductRepository extends BaseRepository<
     try {
       return await this.model.findMany({
         where: {
-          OR: [{ name: { contains: query } }, { description: { contains: query } }],
+          OR: [
+            {
+              name: {
+                contains: query,
+                mode: Prisma.QueryMode.insensitive,
+              } as Prisma.StringFilter<'Product'>,
+            },
+            {
+              description: {
+                contains: query,
+                mode: Prisma.QueryMode.insensitive,
+              } as Prisma.StringFilter<'Product'>,
+            },
+          ],
         },
       });
-    } catch (error) {
+    } catch (error: unknown) {
+      logger.error(
+        {
+          err: error instanceof Error ? error : new Error(String(error)),
+          query,
+        },
+        'Error searching products'
+      );
       throw error;
     }
   }

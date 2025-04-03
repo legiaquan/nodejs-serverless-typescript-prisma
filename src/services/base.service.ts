@@ -1,7 +1,7 @@
+import { type ActionType, ActivityLogService } from './activity-log.service';
 import type { LogChanges } from '../interfaces/activity-log.interface';
 import type { Loggable } from '../interfaces/loggable.interface';
 import { logger } from '../utils/logger';
-import { type ActionType,ActivityLogService } from './activity-log.service';
 
 /**
  * Abstract base class for services
@@ -21,6 +21,7 @@ export abstract class BaseService {
     action: ActionType,
     userId: number,
     beforeEntity?: Loggable | null,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: Record<string, any>
   ): Promise<void> {
     try {

@@ -2,12 +2,15 @@ import crypto from 'node:crypto';
 
 import type { NextFunction, Request, Response } from 'express';
 
-// Định nghĩa interface để mở rộng Request
-declare global {
-  namespace Express {
-    interface Request {
-      requestId?: string;
-    }
+// Extend Express Request interface using module augmentation instead of namespace
+import 'express';
+
+declare module 'express' {
+  interface Request {
+    requestId?: string;
+    context?: {
+      awsRequestId?: string;
+    };
   }
 }
 
@@ -18,7 +21,7 @@ declare global {
 export const requestIdMiddleware = (req: Request, res: Response, next: NextFunction): void => {
   // Kiểm tra xem có AWS request ID không (khi chạy trong môi trường serverless)
   // Lưu ý: context.awsRequestId được truyền qua từ serverless-http
-  const awsRequestId = (req as any).context?.awsRequestId;
+  const awsRequestId = req.context?.awsRequestId;
 
   // Sử dụng AWS request ID nếu có, nếu không thì tạo UUID mới
   const requestId = awsRequestId || crypto.randomUUID();

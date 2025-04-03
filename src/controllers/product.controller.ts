@@ -7,9 +7,9 @@ import type { PriceRangeDTO } from '../dtos/query/price-range.dto';
 import type { ProductFilterDTO } from '../dtos/query/product-filter.dto';
 import type { SearchDTO } from '../dtos/query/search.dto';
 import { ProductService } from '../services/product.service';
-import { fromUTC } from '../utils/date.utils';
+import { fromUTC } from '../utils/date.util';
 import { BadRequestError, NotFoundError } from '../utils/error.response';
-import { CreatedResponse,OkResponse } from '../utils/success.response';
+import { CreatedResponse, OkResponse } from '../utils/success.response';
 
 export class ProductController {
   private productService: ProductService;
@@ -68,7 +68,9 @@ export class ProductController {
     // Add the current user as the creator
     const newProduct = await this.productService.createProduct({
       ...productData,
-      createdBy: req.user.id,
+      user: {
+        connect: { id: req.user.id },
+      },
     });
 
     new CreatedResponse({
@@ -131,14 +133,17 @@ export class ProductController {
   getProductsByPriceRange = async (req: Request, res: Response) => {
     const { minPrice, maxPrice, page, limit } = req.query as unknown as PriceRangeDTO;
 
-    const products = await this.productService.getProductsByPriceRange(minPrice, maxPrice);
+    const products = await this.productService.getProductsByPriceRange(
+      minPrice ?? 0,
+      maxPrice ?? Number.MAX_SAFE_INTEGER
+    );
 
     new OkResponse({
       message: 'Products in price range retrieved successfully',
       metadata: {
         data: products,
         count: products.length,
-        priceRange: { min: minPrice, max: maxPrice },
+        priceRange: { min: minPrice ?? 0, max: maxPrice ?? Number.MAX_SAFE_INTEGER },
         pagination: { page, limit },
       },
     }).send(res);
@@ -168,7 +173,11 @@ export class ProductController {
       throw new BadRequestError('User not authenticated');
     }
 
-    const productsData = req.body.products as CreateProductDTO[];
+    interface BulkProductRequest {
+      products: CreateProductDTO[];
+    }
+
+    const { products: productsData } = req.body as BulkProductRequest;
 
     if (!Array.isArray(productsData) || productsData.length === 0) {
       throw new BadRequestError('Invalid products data');
@@ -178,7 +187,9 @@ export class ProductController {
     const products = await this.productService.bulkCreateProducts(
       productsData.map(product => ({
         ...product,
-        createdBy: req.user!.id,
+        user: {
+          connect: { id: req.user!.id },
+        },
       }))
     );
 

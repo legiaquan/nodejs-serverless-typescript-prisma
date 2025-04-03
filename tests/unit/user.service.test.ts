@@ -3,6 +3,7 @@ import type { User } from '@prisma/client';
 
 import prisma from '../../src/lib/prisma';
 import { UserService } from '../../src/services/user.service';
+import { mockDate, resetDate } from '../utils/date-mock';
 
 // Mock the Prisma client
 jest.mock('../../src/lib/prisma', () => ({
@@ -21,6 +22,11 @@ describe('UserService', () => {
   beforeEach(() => {
     userService = new UserService();
     jest.clearAllMocks();
+    mockDate();
+  });
+
+  afterEach(() => {
+    resetDate();
   });
 
   describe('getAllUsers', () => {
@@ -30,6 +36,7 @@ describe('UserService', () => {
           id: 1,
           name: 'User 1',
           email: 'user1@example.com',
+          password: 'password1',
           role: 'user',
           createdAt: new Date(),
           updatedAt: new Date(),
@@ -38,16 +45,18 @@ describe('UserService', () => {
           id: 2,
           name: 'User 2',
           email: 'user2@example.com',
+          password: 'password2',
           role: 'admin',
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ];
-      (prisma.user.findMany as jest.Mock).mockResolvedValue(mockUsers);
+      const mockFindMany = jest.spyOn(prisma.user, 'findMany');
+      mockFindMany.mockResolvedValue(mockUsers);
 
       const result = await userService.getAllUsers();
 
-      expect(prisma.user.findMany).toHaveBeenCalled();
+      expect(mockFindMany).toHaveBeenCalled();
       expect(result).toEqual(mockUsers);
     });
   });
@@ -58,26 +67,29 @@ describe('UserService', () => {
         id: 1,
         name: 'User 1',
         email: 'user1@example.com',
+        password: 'password1',
         role: 'user',
         createdAt: new Date(),
         updatedAt: new Date(),
       };
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(mockUser);
+      const mockFindUnique = jest.spyOn(prisma.user, 'findUnique');
+      mockFindUnique.mockResolvedValue(mockUser);
 
       const result = await userService.getUserById(1);
 
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 1 },
       });
       expect(result).toEqual(mockUser);
     });
 
     it('should return null when user not found', async () => {
-      (prisma.user.findUnique as jest.Mock).mockResolvedValue(null);
+      const mockFindUnique = jest.spyOn(prisma.user, 'findUnique');
+      mockFindUnique.mockResolvedValue(null);
 
       const result = await userService.getUserById(999);
 
-      expect(prisma.user.findUnique).toHaveBeenCalledWith({
+      expect(mockFindUnique).toHaveBeenCalledWith({
         where: { id: 999 },
       });
       expect(result).toBeNull();

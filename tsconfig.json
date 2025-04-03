@@ -14,8 +14,20 @@
     "baseUrl": "./",
     "paths": {
       "@/*": ["src/*"]
-    }
+    },
+    "allowJs": true,
+    "checkJs": false,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "strictPropertyInitialization": false
   },
-  "include": ["src/**/*", "tests/**/*", "prisma/**/*", "prisma"],
+  "include": [
+    "src/**/*",
+    "tests/**/*",
+    "prisma/**/*",
+    "*.config.js",
+    "*.config.mjs",
+    ".eslintrc.js"
+  ],
   "exclude": ["node_modules", ".serverless", ".build"]
 }

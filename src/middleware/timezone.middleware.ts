@@ -1,4 +1,4 @@
-import type { NextFunction,Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Middleware để xử lý timezone từ client
@@ -14,7 +14,7 @@ export const timezoneMiddleware = (req: Request, res: Response, next: NextFuncti
 
     // Gắn timezone vào request object
     req.timezone = timezone as string;
-  } catch (error) {
+  } catch {
     // Nếu timezone không hợp lệ, sử dụng UTC
     req.timezone = 'UTC';
   }

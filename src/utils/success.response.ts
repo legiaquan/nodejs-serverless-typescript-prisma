@@ -1,11 +1,19 @@
+import type { Response } from 'express';
 import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 import type { SuccessResponseType } from '../interfaces/response.interface';
 
+interface ResponseData {
+  status: 'success';
+  message: string;
+  requestId?: string;
+  metadata: Record<string, unknown>;
+}
+
 export class SuccessResponse {
   public message: string;
   public statusCode: number;
-  public metadata: Record<string, any>;
+  public metadata: Record<string, unknown>;
 
   constructor({
     message = ReasonPhrases.OK,
@@ -17,16 +25,21 @@ export class SuccessResponse {
     this.metadata = metadata;
   }
 
-  send(res: any): void {
+  send(res: Response): void {
     // Lấy request ID từ request object (nếu có)
-    const requestId = res.req?.requestId;
+    const requestId = (res.req as { requestId?: string })?.requestId;
 
-    res.status(this.statusCode).json({
+    const responseData: ResponseData = {
       status: 'success',
       message: this.message,
-      requestId: requestId,
       metadata: this.metadata,
-    });
+    };
+
+    if (requestId) {
+      responseData.requestId = requestId;
+    }
+
+    res.status(this.statusCode).json(responseData);
   }
 }
 

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { ActivityLog } from '@prisma/client';
 
 import type { PaginationInfo } from './pagination.interface';

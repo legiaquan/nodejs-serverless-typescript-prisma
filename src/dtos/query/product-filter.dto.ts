@@ -1,11 +1,62 @@
 import { Expose, Type } from 'class-transformer';
-import { IsDate,IsOptional } from 'class-validator';
+import { IsDate, IsEnum, IsNumber, IsOptional, IsString, Min } from 'class-validator';
 
-import { UTCDate } from '../../decorators/utc-date.decorator';
 import { PaginationDTO } from './pagination.dto';
+import { UTCDate } from '../../decorators/utc-date.decorator';
+
+export enum ProductSortField {
+  ID = 'id',
+  NAME = 'name',
+  PRICE = 'price',
+  STOCK = 'stock',
+  CREATED_AT = 'createdAt',
+  UPDATED_AT = 'updatedAt',
+}
+
+export enum SortOrder {
+  ASC = 'asc',
+  DESC = 'desc',
+}
 
 export class ProductFilterDTO extends PaginationDTO {
-  // Các trường khác...
+  @Expose()
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  @Expose()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  minPrice?: number;
+
+  @Expose()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  maxPrice?: number;
+
+  @Expose()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  minStock?: number;
+
+  @Expose()
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Type(() => Number)
+  maxStock?: number;
+
+  @Expose()
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  createdBy?: number;
 
   @Expose()
   @IsOptional()
@@ -35,5 +86,13 @@ export class ProductFilterDTO extends PaginationDTO {
   @UTCDate()
   updatedTo?: Date;
 
-  // Các trường khác...
+  @Expose()
+  @IsOptional()
+  @IsEnum(ProductSortField)
+  sortBy?: ProductSortField = ProductSortField.CREATED_AT;
+
+  @Expose()
+  @IsOptional()
+  @IsEnum(SortOrder)
+  sortOrder?: SortOrder = SortOrder.DESC;
 }

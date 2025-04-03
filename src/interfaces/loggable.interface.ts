@@ -16,5 +16,6 @@ export interface Loggable {
    * Sanitize the entity for logging
    * This should return a clean object with only the fields that should be logged
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sanitizeForLog(): Record<string, any>;
 }

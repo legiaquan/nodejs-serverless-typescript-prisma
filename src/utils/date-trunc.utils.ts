@@ -1,4 +1,4 @@
-import { toUTC } from './date.utils';
+import { toUTC } from './date.util';
 
 /**
  * Truncate date đến đơn vị cụ thể (tương tự PostgreSQL date_trunc)

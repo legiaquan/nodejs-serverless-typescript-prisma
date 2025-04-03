@@ -1,5 +1,7 @@
-import type { Prisma,User } from '@prisma/client';
+import type { Prisma, User } from '@prisma/client';
 
+import { ActionType } from './activity-log.service';
+import { BaseService } from './base.service';
 import type { PaginationParams } from '../interfaces/pagination.interface';
 import type { UserListResult } from '../interfaces/user.interface';
 import { UserModel } from '../models/user.model';
@@ -7,8 +9,6 @@ import { UserRepository } from '../repos/user.repository';
 import { BadRequestError } from '../utils/error.response';
 import { logger } from '../utils/logger';
 import { createPaginationFromFilter } from '../utils/pagination.utils';
-import { ActionType } from './activity-log.service';
-import { BaseService } from './base.service';
 
 export class UserService extends BaseService {
   private userRepository: UserRepository;
@@ -110,7 +110,7 @@ export class UserService extends BaseService {
   async updateUser(
     id: number,
     userData: Prisma.UserUpdateInput,
-    adminId?: number
+    adminId: number
   ): Promise<User | null> {
     try {
       // Check if user exists
@@ -125,7 +125,9 @@ export class UserService extends BaseService {
           userData.email as string
         );
         if (existingUserWithEmail && existingUserWithEmail.id !== id) {
-          throw new BadRequestError(`User with email ${userData.email} already exists`);
+          const emailValue =
+            typeof userData.email === 'string' ? userData.email : userData.email.set;
+          throw new BadRequestError(`User with email ${emailValue} already exists`);
         }
       }
 
@@ -197,7 +199,7 @@ export class UserService extends BaseService {
   /**
    * Get user activity logs
    */
-  async getUserActivityLogs(userId: number): Promise<any[]> {
+  async getUserActivityLogs(userId: number): Promise<unknown[]> {
     try {
       // Check if user exists
       const user = await this.userRepository.findById(userId);

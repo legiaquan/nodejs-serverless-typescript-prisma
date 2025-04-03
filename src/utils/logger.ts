@@ -1,4 +1,9 @@
+import type { Request, Response } from 'express';
 import pino from 'pino';
+
+interface LogInfo {
+  [key: string]: unknown;
+}
 
 // Xác định cấu hình Pino dựa trên môi trường
 const pinoConfig: pino.LoggerOptions = {
@@ -9,7 +14,7 @@ const pinoConfig: pino.LoggerOptions = {
   },
   timestamp: pino.stdTimeFunctions.isoTime,
   formatters: {
-    level: label => {
+    level: (label: string): { level: string } => {
       return { level: label.toUpperCase() };
     },
   },
@@ -43,7 +48,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 // Hàm trợ giúp để log các thông tin request
-export const logRequest = (req: any, info?: Record<string, any>) => {
+export const logRequest = (req: Request, info?: LogInfo): void => {
   logger.info(
     {
       method: req.method,
@@ -61,11 +66,11 @@ export const logRequest = (req: any, info?: Record<string, any>) => {
 
 // Hàm trợ giúp để log các thông tin response
 export const logResponse = (
-  req: any,
-  res: any,
+  req: Request,
+  res: Response,
   responseTime: number,
-  info?: Record<string, any>
-) => {
+  info?: LogInfo
+): void => {
   const logLevel = res.statusCode >= 400 ? 'warn' : 'info';
 
   logger[logLevel](

@@ -1,13 +1,15 @@
-import type { Prisma, User } from '@prisma/client';
+import type { Prisma, User, PrismaClient } from '@prisma/client';
 
-import prisma from '../lib/prisma';
 import { BaseRepository } from './base.repository';
+import prisma from '../lib/prisma';
 
 export class UserRepository extends BaseRepository<
   User,
   Prisma.UserCreateInput,
   Prisma.UserUpdateInput
 > {
+  declare protected model: PrismaClient['user'];
+
   constructor() {
     super(prisma.user, 'User');
   }
@@ -16,40 +18,28 @@ export class UserRepository extends BaseRepository<
    * Find user by email
    */
   async findByEmail(email: string): Promise<User | null> {
-    try {
-      return await this.model.findUnique({
-        where: { email },
-      });
-    } catch (error) {
-      throw error;
-    }
+    return await this.model.findUnique({
+      where: { email },
+    });
   }
 
   /**
    * Find users by role
    */
   async findByRole(role: string): Promise<User[]> {
-    try {
-      return await this.model.findMany({
-        where: { role },
-      });
-    } catch (error) {
-      throw error;
-    }
+    return await this.model.findMany({
+      where: { role },
+    });
   }
 
   /**
    * Search users by name or email
    */
   async search(query: string): Promise<User[]> {
-    try {
-      return await this.model.findMany({
-        where: {
-          OR: [{ name: { contains: query } }, { email: { contains: query } }],
-        },
-      });
-    } catch (error) {
-      throw error;
-    }
+    return await this.model.findMany({
+      where: {
+        OR: [{ name: { contains: query } }, { email: { contains: query } }],
+      },
+    });
   }
 }

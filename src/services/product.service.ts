@@ -1,5 +1,7 @@
-import type { Prisma,Product } from '@prisma/client';
+import type { Prisma, Product, User, PrismaClient } from '@prisma/client';
 
+import { ActionType } from './activity-log.service';
+import { BaseService } from './base.service';
 import { ProductFilterDTO } from '../dtos/query/product-filter.dto';
 import type { ProductListResult } from '../interfaces/product.interface';
 import { ProductModel } from '../models/product.model';
@@ -7,8 +9,10 @@ import { ProductRepository } from '../repos/product.repository';
 import { BadRequestError } from '../utils/error.response';
 import { logger } from '../utils/logger';
 import { createPaginationFromFilter } from '../utils/pagination.utils';
-import { ActionType } from './activity-log.service';
-import { BaseService } from './base.service';
+
+interface ProductWithUser extends Product {
+  user: Pick<User, 'id' | 'name' | 'email' | 'role'>;
+}
 
 export class ProductService extends BaseService {
   private productRepository: ProductRepository;
@@ -30,13 +34,18 @@ export class ProductService extends BaseService {
       const { data, total } = await this.productRepository.findWithFilters(productFilter);
 
       // Generate pagination info using the utility function
-      const pagination = createPaginationFromFilter(productFilter, total);
+      const paginationInfo = createPaginationFromFilter(productFilter, total);
 
       // Return data with pagination info
       return {
         data,
         total,
-        pagination,
+        pagination: {
+          currentPage: paginationInfo.page,
+          pageSize: paginationInfo.limit,
+          totalPages: paginationInfo.totalPages,
+          totalItems: paginationInfo.totalItems,
+        },
       };
     } catch (error) {
       logger.error({ err: error, filter }, 'Error getting products with filters');
@@ -47,7 +56,7 @@ export class ProductService extends BaseService {
   /**
    * Get product by ID
    */
-  async getProductById(id: number, userId?: number): Promise<Product | null> {
+  async getProductById(id: number, userId?: number): Promise<ProductWithUser | null> {
     try {
       const product = await this.productRepository.findById(id, {
         include: {
@@ -74,7 +83,7 @@ export class ProductService extends BaseService {
         );
       }
 
-      return product;
+      return product as ProductWithUser;
     } catch (error) {
       logger.error({ err: error, id }, `Error getting product with id ${id}`);
       throw error;
@@ -87,11 +96,14 @@ export class ProductService extends BaseService {
   async createProduct(productData: Prisma.ProductCreateInput): Promise<Product> {
     try {
       // Validate product data
-      if (productData.price < 0) {
-        throw new BadRequestError('Product price cannot be negative');
+      const priceValue =
+        typeof productData.price === 'number' ? productData.price : Number(productData.price);
+      if (isNaN(priceValue) || priceValue < 0) {
+        throw new BadRequestError('Product price must be a non-negative number');
       }
 
-      if (productData.stock < 0) {
+      const stockValue = productData.stock ?? 0;
+      if (stockValue < 0) {
         throw new BadRequestError('Product stock cannot be negative');
       }
 
@@ -100,12 +112,7 @@ export class ProductService extends BaseService {
 
       // Log the activity
       const productModel = new ProductModel(newProduct);
-      await this.logActivity(
-        productModel,
-        ActionType.CREATE,
-        productData.createdBy as number,
-        null
-      );
+      await this.logActivity(productModel, ActionType.CREATE, newProduct.createdBy, null);
 
       return newProduct;
     } catch (error) {
@@ -126,11 +133,13 @@ export class ProductService extends BaseService {
       }
 
       // Validate product data
-      if (productData.price !== undefined && (productData.price as number) < 0) {
+      const priceValue = productData.price as number | undefined;
+      if (priceValue !== undefined && priceValue < 0) {
         throw new BadRequestError('Product price cannot be negative');
       }
 
-      if (productData.stock !== undefined && (productData.stock as number) < 0) {
+      const stockValue = productData.stock as number | undefined;
+      if (stockValue !== undefined && stockValue < 0) {
         throw new BadRequestError('Product stock cannot be negative');
       }
 
@@ -138,12 +147,14 @@ export class ProductService extends BaseService {
       const updatedProduct = await this.productRepository.update(id, productData);
 
       // Get the user ID from the request or from the existing product
-      const userId = (productData.user as any)?.connect?.id || existingProduct.createdBy;
+      const userConnect =
+        productData.user as Prisma.UserUpdateOneRequiredWithoutProductsNestedInput;
+      const userId = userConnect?.connect?.id || existingProduct.createdBy;
 
       // Log the activity with changes
       const beforeModel = new ProductModel(existingProduct);
       const afterModel = new ProductModel(updatedProduct);
-      await this.logActivity(afterModel, ActionType.UPDATE, userId as number, beforeModel);
+      await this.logActivity(afterModel, ActionType.UPDATE, userId, beforeModel);
 
       return updatedProduct;
     } catch (error) {
@@ -237,41 +248,51 @@ export class ProductService extends BaseService {
     try {
       // Validate all products
       for (const productData of productsData) {
-        if (productData.price < 0) {
-          throw new BadRequestError('Product price cannot be negative');
+        const priceValue =
+          typeof productData.price === 'number' ? productData.price : Number(productData.price);
+        if (isNaN(priceValue) || priceValue < 0) {
+          throw new BadRequestError('Product price must be a non-negative number');
         }
 
-        if (productData.stock < 0) {
+        const stockValue = productData.stock ?? 0;
+        if (stockValue < 0) {
           throw new BadRequestError('Product stock cannot be negative');
         }
       }
 
       // Use transaction to create all products
-      return await this.productRepository.transaction(async tx => {
-        const createdProducts: Product[] = [];
+      return await this.productRepository.transaction(
+        async (
+          tx: Omit<
+            PrismaClient,
+            '$connect' | '$disconnect' | '$on' | '$transaction' | '$use' | '$extends'
+          >
+        ) => {
+          const createdProducts: Product[] = [];
 
-        for (const productData of productsData) {
-          const product = await tx.product.create({
-            data: productData,
-          });
-          createdProducts.push(product);
+          for (const productData of productsData) {
+            const product = await tx.product.create({
+              data: productData,
+            });
+            createdProducts.push(product);
 
-          // Log the activity for each created product
-          await tx.activityLog.create({
-            data: {
-              entityType: 'product',
-              entityId: product.id,
-              action: ActionType.CREATE,
-              userId: productData.createdBy as number,
-              changes: {
-                after: new ProductModel(product).sanitizeForLog(),
-              } as Prisma.JsonObject,
-            },
-          });
+            // Log the activity for each created product
+            await tx.activityLog.create({
+              data: {
+                entityType: 'product',
+                entityId: product.id,
+                action: ActionType.CREATE,
+                userId: product.createdBy,
+                changes: {
+                  after: new ProductModel(product).sanitizeForLog(),
+                } as Prisma.JsonObject,
+              },
+            });
+          }
+
+          return createdProducts;
         }
-
-        return createdProducts;
-      });
+      );
     } catch (error) {
       logger.error({ err: error }, 'Error bulk creating products');
       throw error;
@@ -281,7 +302,7 @@ export class ProductService extends BaseService {
   /**
    * Get product activity logs
    */
-  async getProductActivityLogs(productId: number): Promise<any[]> {
+  async getProductActivityLogs(productId: number): Promise<unknown[]> {
     try {
       // Check if product exists
       const product = await this.productRepository.findById(productId);

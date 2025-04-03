@@ -1,54 +1,54 @@
-import type { NextFunction,Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { hasPermission,Permission } from '../constants/permissions';
+import { asyncHandler } from './global-error-handler';
+import { hasPermission, Permission } from '../constants/permissions';
 import { AuthFailureError, ForbiddenError } from '../utils/error.response';
 import { logger } from '../utils/logger';
-import { asyncHandler } from './global-error-handler';
 
-// Extend Express Request interface to include user property
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: number;
-        email: string;
-        role: string;
-      };
-    }
+// Extend Express Request interface using module augmentation
+import 'express';
+
+declare module 'express' {
+  interface Request {
+    user?: {
+      id: number;
+      email: string;
+      role: string;
+    };
   }
+}
+
+interface JwtPayload {
+  id: number;
+  email: string;
+  role: string;
 }
 
 /**
  * Middleware to verify JWT token and authenticate user
  */
-export const authenticate = asyncHandler(
-  async (req: Request, res: Response, next: NextFunction) => {
-    // Get token from Authorization header
-    const authHeader = req.headers.authorization;
-    const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
+export const authenticate = (req: Request, res: Response, next: NextFunction): void => {
+  // Get token from Authorization header
+  const authHeader = req.headers.authorization;
+  const token = authHeader && authHeader.split(' ')[1]; // Bearer TOKEN
 
-    if (!token) {
-      throw new AuthFailureError('Access token is required');
-    }
-
-    try {
-      // Verify token
-      const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as {
-        id: number;
-        email: string;
-        role: string;
-      };
-
-      // Attach user to request object
-      req.user = decoded;
-      next();
-    } catch (error) {
-      logger.error({ err: error }, 'JWT verification failed');
-      throw new AuthFailureError('Invalid or expired token');
-    }
+  if (!token) {
+    throw new AuthFailureError('Access token is required');
   }
-);
+
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, process.env.JWT_SECRET || 'your-secret-key') as JwtPayload;
+
+    // Attach user to request object
+    req.user = decoded;
+    next();
+  } catch (error) {
+    logger.error({ err: error }, 'JWT verification failed');
+    throw new AuthFailureError('Invalid or expired token');
+  }
+};
 
 /**
  * Middleware to check if user has required permission

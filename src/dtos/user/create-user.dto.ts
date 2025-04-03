@@ -7,6 +7,7 @@ import {
   Length,
   Matches,
   MaxLength,
+  MinLength,
 } from 'class-validator';
 
 /**
@@ -18,6 +19,7 @@ import {
  *       required:
  *         - name
  *         - email
+ *         - password
  *       properties:
  *         name:
  *           type: string
@@ -28,6 +30,11 @@ import {
  *           format: email
  *           description: User's email address
  *           example: john.doe@example.com
+ *         password:
+ *           type: string
+ *           format: password
+ *           description: User's password (min 8 chars, must include uppercase, lowercase, number, and special character)
+ *           example: StrongP@ss123
  *         role:
  *           type: string
  *           description: User's role
@@ -45,6 +52,16 @@ export class CreateUserDTO {
   @IsEmail({}, { message: 'Invalid email format' })
   @MaxLength(100, { message: 'Email must be at most 100 characters' })
   email: string;
+
+  @Expose()
+  @IsNotEmpty({ message: 'Password is required' })
+  @IsString({ message: 'Password must be a string' })
+  @MinLength(8, { message: 'Password must be at least 8 characters' })
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+  })
+  password: string;
 
   @Expose()
   @IsOptional()

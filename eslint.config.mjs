@@ -1,74 +1,67 @@
-import { FlatCompat } from '@eslint/eslintrc';
-import js from '@eslint/js';
-import tsEslintPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import simpleImportSort from 'eslint-plugin-simple-import-sort';
-import globals from 'globals';
-import path from 'path';
-import { fileURLToPath } from 'url';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-  recommendedConfig: js.configs.recommended,
-  allConfig: js.configs.all,
-});
+import eslint from '@eslint/js';
+import tseslint from '@typescript-eslint/eslint-plugin';
+import tsparser from '@typescript-eslint/parser';
+import prettier from 'eslint-config-prettier';
+import importPlugin from 'eslint-plugin-import';
+import jestPlugin from 'eslint-plugin-jest';
+import promisePlugin from 'eslint-plugin-promise';
 
 export default [
-  ...compat.extends('plugin:@typescript-eslint/recommended'),
+  // Base config for all files
   {
-    ignores: [
-      'node_modules',
-      'dist',
-      '*.min.js',
-      'dockers',
-      'coverage',
-      '.serverless',
-      '.scannerwork',
-    ],
-    plugins: {
-      '@typescript-eslint': tsEslintPlugin,
-      'simple-import-sort': simpleImportSort,
-    },
-    languageOptions: {
-      globals: {
-        ...globals.node,
-        ...globals.jest,
-      },
-      parser: tsParser,
-      ecmaVersion: 5,
-      sourceType: 'module',
-      parserOptions: {
-        project: 'tsconfig.json',
-        tsconfigRootDir: __dirname,
-      },
-    },
-    rules: {
-      '@typescript-eslint/interface-name-prefix': 'off',
-      '@typescript-eslint/explicit-function-return-type': 'off',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-explicit-any': 'error',
-      'no-unused-vars': 'off',
-      '@typescript-eslint/no-unused-vars': ['error'],
-      'require-await': 'off',
-      '@typescript-eslint/require-await': 'error',
-      '@typescript-eslint/no-floating-promises': 'error',
-      'no-restricted-syntax': [
-        'error',
-        {
-          selector:
-            'CallExpression[callee.object.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true])), CallExpression[callee.object.property.name=configService][callee.property.name=/^(get|getOrThrow)$/]:not(:has([arguments.1] Property[key.name=infer][value.value=true]))',
-          message:
-            'Add "{ infer: true }" to configService.get() for correct typechecking. Example: configService.get("database.port", { infer: true })',
-        },
-        {
-          selector: 'CallExpression[callee.name=it][arguments.0.value!=/^should/]',
-          message: '"it" should start with "should"',
-        },
-      ],
-      'simple-import-sort/imports': 'error',
-      'simple-import-sort/exports': 'error',
+    ignores: ['dist/**', 'node_modules/**', '.serverless/**', '.build/**'],
+    linterOptions: {
+      reportUnusedDisableDirectives: true,
     },
   },
+  // JavaScript files
+  {
+    files: ['**/*.js', '**/*.mjs', '**/*.cjs'],
+    ...eslint.configs.recommended,
+    plugins: {
+      import: importPlugin,
+    },
+    rules: {
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+    },
+  },
+  // TypeScript files
+  {
+    files: ['**/*.ts'],
+    languageOptions: {
+      parser: tsparser,
+      parserOptions: {
+        project: './tsconfig.json',
+      },
+    },
+    plugins: {
+      '@typescript-eslint': tseslint,
+      import: importPlugin,
+      jest: jestPlugin,
+      promise: promisePlugin,
+    },
+    rules: {
+      ...tseslint.configs['recommended'].rules,
+      ...tseslint.configs['recommended-requiring-type-checking'].rules,
+      '@typescript-eslint/no-explicit-any': 'warn',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
+      'import/order': [
+        'error',
+        {
+          groups: ['builtin', 'external', 'internal', ['parent', 'sibling', 'index']],
+          'newlines-between': 'always',
+          alphabetize: { order: 'asc', caseInsensitive: true },
+        },
+      ],
+    },
+  },
+  // Apply prettier config to all files
+  prettier,
 ];

@@ -6,7 +6,7 @@ import type {
   LogChanges,
 } from '../interfaces/activity-log.interface';
 import { ActivityLogRepository } from '../repos/activity-log.repository';
-import { toUTC } from '../utils/date.utils';
+import { toUTC } from '../utils/date.util';
 import { logger } from '../utils/logger';
 import { createPaginationFromFilter } from '../utils/pagination.utils';
 
@@ -54,6 +54,7 @@ export class ActivityLogService {
     action: string,
     userId: number,
     changes?: LogChanges,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     metadata?: Record<string, any>
   ): Promise<ActivityLog> {
     try {
@@ -63,7 +64,8 @@ export class ActivityLogService {
         timestamp: toUTC(new Date()).toISOString(),
       };
 
-      return await this.activityLogRepository.create({
+      // Use the custom createLog method which handles entityId correctly
+      return await this.activityLogRepository.createLog({
         entityType,
         entityId,
         action,

@@ -1,7 +1,6 @@
-import { Prisma } from '@prisma/client';
 import { PrismaClientKnownRequestError } from '@prisma/client/runtime/library';
 import type { NextFunction, Request, Response } from 'express';
-import { ReasonPhrases,StatusCodes } from 'http-status-codes';
+import { ReasonPhrases, StatusCodes } from 'http-status-codes';
 
 import { ErrorResponse } from '../utils/error.response';
 import { logger } from '../utils/logger';
@@ -16,6 +15,7 @@ export const errorHandler = (
   let statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
   let message: string = ReasonPhrases.INTERNAL_SERVER_ERROR;
   let stack: string | undefined;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let errorDetails: Record<string, any> = {};
 
   // Handle custom ErrorResponse instances

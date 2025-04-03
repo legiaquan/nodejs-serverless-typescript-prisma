@@ -1,3 +1,4 @@
+import type { Router as ExpressRouter } from 'express';
 import { Router } from 'express';
 
 import { Permission } from '../constants/permissions';
@@ -5,7 +6,7 @@ import { ActivityLogController } from '../controllers/activity-log.controller';
 import { authenticate, requirePermission } from '../middleware/auth.middleware';
 import { asyncHandler } from '../middleware/global-error-handler';
 
-const router = Router();
+const router: ExpressRouter = Router();
 const activityLogController = new ActivityLogController();
 
 /**
