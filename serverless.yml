@@ -3,18 +3,22 @@ service: nodejs-serverless-typescript-prisma
 frameworkVersion: '3'
 
 plugins:
+  - serverless-dotenv-plugin
   - serverless-plugin-typescript
   - serverless-offline
-  - serverless-dotenv-plugin
 
 provider:
   name: aws
   runtime: nodejs22.x
   stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'us-east-1'}
+  region: us-east-1
   environment:
-    NODE_ENV: ${opt:stage, 'dev'}
-    DATABASE_URL: ${env:DATABASE_URL}
+    DATABASE_URL: ${env:DATABASE_URL, ''}
+    NODE_ENV: ${env:NODE_ENV, 'development'}
+    JWT_SECRET: ${env:JWT_SECRET, ''}
+    PORT: ${env:PORT, '3000'}
+    LOG_LEVEL: ${env:LOG_LEVEL, 'info'}
+    CORS_ORIGIN: ${env:CORS_ORIGIN, '*'}
 
 custom:
   serverless-offline:
@@ -22,6 +26,18 @@ custom:
     lambdaPort: 3002
   dotenv:
     path: ./.env
+    basePath: ./
+    include:
+      - DATABASE_URL
+      - NODE_ENV
+      - JWT_SECRET
+      - PORT
+      - LOG_LEVEL
+      - CORS_ORIGIN
+    logging: false
+    required:
+      - DATABASE_URL
+      - JWT_SECRET
 
 functions:
   api:

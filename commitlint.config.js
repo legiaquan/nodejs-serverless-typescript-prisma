@@ -15,17 +15,17 @@ module.exports = {
       2,
       'always',
       [
-        'build',
-        'chore',
-        'ci',
-        'docs',
-        'feat',
-        'fix',
-        'perf',
-        'refactor',
-        'revert',
-        'style',
-        'test',
+        'build', // Changes that affect the build system or external dependencies
+        'chore', // Regular maintenance tasks and updates
+        'ci', // Changes to CI configuration files and scripts
+        'docs', // Documentation only changes
+        'feat', // A new feature implementation
+        'fix', // A bug fix
+        'perf', // A code change that improves performance
+        'refactor', // A code change that neither fixes a bug nor adds a feature
+        'revert', // Reverting a previous commit
+        'style', // Changes that do not affect the meaning of the code (whitespace, formatting, etc)
+        'test', // Adding or modifying tests
       ],
     ],
   },

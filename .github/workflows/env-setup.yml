@@ -1,0 +1,101 @@
+name: Environment Setup
+
+on:
+  workflow_call:
+    inputs:
+      stage:
+        description: 'Environment/stage to deploy (dev, staging, prod)'
+        required: true
+        type: string
+        default: 'dev'
+    outputs:
+      env_validated:
+        description: 'Whether environment validation was successful'
+        value: ${{ jobs.setup-env.outputs.validated }}
+
+jobs:
+  setup-env:
+    name: Setup Environment Variables
+    runs-on: ubuntu-latest
+    outputs:
+      validated: ${{ steps.validate.outputs.valid }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Get environment variables from Secret Manager
+        id: secrets
+        run: |
+          # Get secret based on environment
+          ENV_SECRET_NAME="env-${{ inputs.stage }}"
+
+          # Retrieve secret from AWS Secret Manager
+          SECRET_VALUE=$(aws secretsmanager get-secret-value --secret-id $ENV_SECRET_NAME --query SecretString --output text)
+
+          # Save to .env file
+          echo "$SECRET_VALUE" > .env
+
+          echo "Successfully retrieved environment variables for ${{ inputs.stage }}"
+
+      - name: Install dotenv-cli for validation
+        run: npm install -g dotenv-cli
+
+      - name: Validate environment variables
+        id: validate
+        run: |
+          # Check if required variables exist
+          REQUIRED_VARS=("DATABASE_URL" "NODE_ENV" "JWT_SECRET")
+          VALID=true
+
+          for var in "${REQUIRED_VARS[@]}"; do
+            VAL=$(dotenv -e .env -- bash -c "echo \${$var}")
+            if [ -z "$VAL" ]; then
+              echo "::error::Required environment variable $var is missing or empty!"
+              VALID=false
+            else
+              echo "✓ $var is set"
+            fi
+          done
+
+          # Check DATABASE_URL format (basic check)
+          DB_URL=$(dotenv -e .env -- bash -c "echo \$DATABASE_URL")
+          if [[ ! "$DB_URL" =~ ^(mysql|postgresql)://.*$ ]]; then
+            echo "::error::DATABASE_URL doesn't match expected format (should start with mysql:// or postgresql://)"
+            VALID=false
+          else
+            echo "✓ DATABASE_URL format looks valid"
+          fi
+
+          # Check optional variables and show warning if missing
+          OPTIONAL_VARS=("PORT" "LOG_LEVEL" "CORS_ORIGIN")
+          for var in "${OPTIONAL_VARS[@]}"; do
+            VAL=$(dotenv -e .env -- bash -c "echo \${$var}")
+            if [ -z "$VAL" ]; then
+              echo "::warning::Optional environment variable $var is missing, default value will be used"
+            else
+              echo "✓ $var is set"
+            fi
+          done
+
+          if [ "$VALID" = true ]; then
+            echo "✅ All environment variables validated successfully"
+            echo "valid=true" >> $GITHUB_OUTPUT
+          else
+            echo "❌ Environment validation failed"
+            echo "valid=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+
+      - name: Upload .env as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: env-file
+          path: .env
+          retention-days: 1

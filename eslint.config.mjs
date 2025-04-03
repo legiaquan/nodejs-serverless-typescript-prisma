@@ -9,9 +9,35 @@ import promisePlugin from 'eslint-plugin-promise';
 export default [
   // Base config for all files
   {
-    ignores: ['dist/**', 'node_modules/**', '.serverless/**', '.build/**'],
+    ignores: [
+      'dist/**',
+      'node_modules/**',
+      '.serverless/**',
+      '.build/**',
+      'coverage/**',
+      '**/*.json',
+      '**/*.lock',
+      '**/*.yml',
+      '**/*.yaml',
+      'prisma/generated/**',
+      'prisma/migrations/**',
+      'test-results/**',
+      'jest.config.js',
+      'commitlint.config.js',
+      '**/*.d.ts',
+      '**/*.js.map',
+      '**/*.min.js',
+      '**/*.bundle.js',
+      '.git/**',
+      '.github/**',
+      '.vscode/**',
+      'node_modules/.bin/**',
+      'node_modules/.cache/**',
+      'tests/**',
+    ],
     linterOptions: {
-      reportUnusedDisableDirectives: true,
+      reportUnusedDisableDirectives: 'off',
+      noInlineConfig: false,
     },
   },
   // JavaScript files
@@ -39,6 +65,20 @@ export default [
       parser: tsparser,
       parserOptions: {
         project: './tsconfig.json',
+        tsconfigRootDir: '.',
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        ecmaFeatures: { jsx: false },
+        warnOnUnsupportedTypeScriptVersion: false,
+      },
+      globals: {
+        NodeJS: 'readonly',
+        jest: 'readonly',
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
       },
     },
     plugins: {

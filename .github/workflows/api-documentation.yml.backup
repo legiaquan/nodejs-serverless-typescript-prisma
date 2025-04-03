@@ -1,0 +1,64 @@
+name: API Documentation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'src/**/*.ts'
+      - 'src/config/swagger.config.ts'
+      - 'src/swagger/**'
+  workflow_dispatch:
+
+jobs:
+  generate-docs:
+    name: Generate API Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate Swagger documentation
+        run: npm run swagger:generate
+
+      - name: Create API docs directory
+        run: mkdir -p public/api-docs
+
+      - name: Generate Swagger UI
+        run: |
+          npx swagger-ui-dist-package
+          cp -R node_modules/swagger-ui-dist/* public/api-docs/
+          cp swagger.json public/api-docs/
+          cat > public/api-docs/swagger-initializer.js << EOF
+          window.onload = function() {
+            window.ui = SwaggerUIBundle({
+              url: "./swagger.json",
+              dom_id: '#swagger-ui',
+              deepLinking: true,
+              presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+              ],
+              plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+              ],
+              layout: "StandaloneLayout"
+            });
+          };
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          destination_dir: api-docs
+          full_commit_message: 'docs: update API documentation [skip ci]'

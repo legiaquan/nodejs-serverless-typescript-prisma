@@ -1,0 +1,47 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:base", ":disableDependencyDashboard"],
+  "schedule": ["after 1am and before 5am every monday"],
+  "timezone": "Asia/Ho_Chi_Minh",
+  "labels": ["dependencies"],
+  "packageRules": [
+    {
+      "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
+      "automerge": true,
+      "automergeType": "branch"
+    },
+    {
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "dev dependencies (non-major)",
+      "groupSlug": "dev-dependencies"
+    },
+    {
+      "matchPackagePatterns": ["^@types/"],
+      "groupName": "type definitions",
+      "groupSlug": "types"
+    },
+    {
+      "matchPackagePatterns": ["^eslint"],
+      "groupName": "eslint packages",
+      "groupSlug": "eslint"
+    },
+    {
+      "matchUpdateTypes": ["major"],
+      "labels": ["dependencies", "breaking"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "labels": ["security"],
+    "assignees": ["maintainer_username"]
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "schedule": ["before 5am on monday"]
+  },
+  "prConcurrentLimit": 5,
+  "prHourlyLimit": 2,
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "semanticCommitType": "chore"
+}

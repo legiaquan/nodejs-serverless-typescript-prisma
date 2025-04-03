@@ -14,5 +14,59 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "eslint.validate": ["typescript", "javascript"],
-  "typescript.tsdk": "node_modules/typescript/lib"
+  "typescript.tsdk": "node_modules/typescript/lib",
+  "eslint.run": "onSave",
+  "eslint.lintTask.enable": false,
+  "editor.quickSuggestions": {
+    "strings": true
+  },
+  "eslint.workingDirectories": [
+    {
+      "mode": "auto"
+    }
+  ],
+  "typescript.tsserver.maxTsServerMemory": 8192,
+  "typescript.tsserver.watchOptions": {
+    "watchFile": "useFsEvents",
+    "watchDirectory": "useFsEvents",
+    "fallbackPolling": "dynamicPriority"
+  },
+  "eslint.useESLintClass": true,
+  "eslint.debug": false,
+  "eslint.quiet": true,
+  "eslint.format.enable": false,
+  "typescript.disableAutomaticTypeAcquisition": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "javascript.updateImportsOnFileMove.enabled": "never",
+  "typescript.updateImportsOnFileMove.enabled": "never",
+  "typescript.surveys.enabled": false,
+  "editor.formatOnPaste": false,
+  "editor.formatOnType": false,
+  "javascript.format.enable": false,
+  "typescript.format.enable": false,
+  "editor.suggest.snippetsPreventQuickSuggestions": false,
+  "typescript.suggest.enabled": false,
+  "javascript.suggest.enabled": false,
+  "editor.suggest.showStatusBar": true,
+  "editor.suggest.preview": true,
+  "typescript.tsserver.useSeparatedLogFile": false,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.serverless": true,
+    "**/.git": true,
+    "**/.DS_Store": true,
+    "**/.build": true,
+    "**/dist": true,
+    "**/coverage": true
+  },
+  "files.watcherExclude": {
+    "**/node_modules": true,
+    "**/.serverless": true,
+    "**/.git": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/.serverless": true,
+    "**/.git": true
+  }
 }

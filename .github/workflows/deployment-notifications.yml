@@ -1,0 +1,104 @@
+name: Deployment Notifications
+
+on:
+  workflow_run:
+    workflows: [Deploy]
+    types: [completed]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get workflow information
+        run: |
+          echo "Workflow ${{ github.event.workflow_run.name }} completed with status: ${{ github.event.workflow_run.conclusion }}"
+          echo "WORKFLOW_STATUS=${{ github.event.workflow_run.conclusion }}" >> $GITHUB_ENV
+          echo "BRANCH_NAME=${{ github.event.workflow_run.head_branch }}" >> $GITHUB_ENV
+          echo "COMMIT_SHA=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_ENV
+          echo "RUN_ID=${{ github.event.workflow_run.id }}" >> $GITHUB_ENV
+          echo "REPO=${{ github.event.workflow_run.repository.full_name }}" >> $GITHUB_ENV
+
+      # Thông báo qua Slack
+      - name: Slack Notification on Success
+        if: env.WORKFLOW_STATUS == 'success'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: good
+          SLACK_ICON: https://github.com/nodejs.png
+          SLACK_TITLE: 'Serverless app deployed successfully :rocket:'
+          SLACK_MESSAGE: 'Deployment to AWS completed successfully'
+          SLACK_FOOTER: 'Deployed from branch ${{ env.BRANCH_NAME }}'
+
+      - name: Slack Notification on Failure
+        if: env.WORKFLOW_STATUS != 'success'
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_CHANNEL: deployments
+          SLACK_COLOR: danger
+          SLACK_ICON: https://github.com/nodejs.png
+          SLACK_TITLE: 'Serverless app deployment failed :x:'
+          SLACK_MESSAGE: 'Deployment to AWS failed. Check logs for details.'
+          SLACK_FOOTER: 'Failed deployment from branch ${{ env.BRANCH_NAME }}'
+
+      # Thông báo qua Email
+      - name: Send email on success
+        if: env.WORKFLOW_STATUS == 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: '✅ Serverless app deployed successfully'
+          body: |
+            Deployment to AWS was successful.
+
+            Branch: ${{ env.BRANCH_NAME }}
+            Commit: ${{ env.COMMIT_SHA }}
+
+            View commit: https://github.com/${{ env.REPO }}/commit/${{ env.COMMIT_SHA }}
+            View workflow: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN_ID }}
+          to: ${{ secrets.TEAM_EMAIL }}
+          from: GitHub Actions
+
+      - name: Send email on failure
+        if: env.WORKFLOW_STATUS != 'success'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: ${{ secrets.MAIL_SERVER }}
+          server_port: ${{ secrets.MAIL_PORT }}
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          subject: '❌ Serverless app deployment failed'
+          body: |
+            Deployment to AWS failed.
+
+            Branch: ${{ env.BRANCH_NAME }}
+            Commit: ${{ env.COMMIT_SHA }}
+
+            Please check the logs: https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN_ID }}
+          to: ${{ secrets.TEAM_EMAIL }}
+          from: GitHub Actions
+
+      # Thông báo qua Teams
+      - name: Microsoft Teams notification
+        uses: skitionek/notify-microsoft-teams@master
+        with:
+          webhook_url: ${{ secrets.TEAMS_WEBHOOK }}
+          overwrite: |
+            {
+              "title": "Deployment ${{ env.WORKFLOW_STATUS == 'success' && 'successful' || 'failed' }} for ${{ env.REPO }}",
+              "sections": [
+                {
+                  "facts": [
+                    { "name": "Status", "value": "${{ env.WORKFLOW_STATUS }}" },
+                    { "name": "Branch", "value": "${{ env.BRANCH_NAME }}" },
+                    { "name": "Commit", "value": "${{ env.COMMIT_SHA }}" }
+                  ],
+                  "text": "${{ env.WORKFLOW_STATUS == 'success' && '✅ Deployment succeeded' || '❌ Deployment failed' }}. [View logs](https://github.com/${{ env.REPO }}/actions/runs/${{ env.RUN_ID }})"
+                }
+              ]
+            }

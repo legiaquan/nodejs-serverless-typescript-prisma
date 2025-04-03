@@ -1,0 +1,66 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - staging
+          - prod
+
+jobs:
+  # Gọi workflow để lấy và validate biến môi trường
+  setup-environment:
+    uses: ./.github/workflows/env-setup.yml
+    with:
+      stage: ${{ github.event.inputs.stage || 'dev' }}
+    secrets: inherit
+
+  # Job deploy chỉ chạy khi setup-environment thành công
+  deploy:
+    needs: setup-environment
+    if: needs.setup-environment.outputs.env_validated == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Download .env file
+        uses: actions/download-artifact@v4
+        with:
+          name: env-file
+          path: ./
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate
+
+      - name: Run database migrations
+        run: npm run prisma:migrate:deploy
+
+      - name: Serverless AWS authentication
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Deploy to AWS
+        run: |
+          # Set stage parameter based on input or default
+          STAGE="${{ github.event.inputs.stage || 'dev' }}"
+          npm run deploy -- --stage $STAGE

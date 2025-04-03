@@ -1,0 +1,94 @@
+name: Dependency Updates
+
+on:
+  schedule:
+    # Chạy vào 2:00 UTC mỗi thứ Hai
+    - cron: '0 2 * * 1'
+  workflow_dispatch:
+
+jobs:
+  renovate:
+    name: Renovate Dependency Update
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@v40.0.0
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          configurationFile: renovate-config.json
+        env:
+          LOG_LEVEL: 'debug'
+
+  # Tạo báo cáo về outdated dependencies
+  outdated-report:
+    name: Outdated Dependencies Report
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate outdated dependencies report
+        run: |
+          npm outdated --json > outdated.json || true
+
+      - name: Create report from outdated dependencies
+        if: always()
+        run: |
+          echo "# Dependencies Outdated Report" > report.md
+          echo "Generated on $(date)" >> report.md
+          echo "" >> report.md
+          echo "## Summary" >> report.md
+
+          if [ -s outdated.json ]; then
+            echo "Dependencies that need updates:" >> report.md
+            echo "\`\`\`" >> report.md
+            jq -r 'to_entries | .[] | "\(.key): \(.value.current) → \(.value.latest) (\(.value.type))"' outdated.json | sort >> report.md
+            echo "\`\`\`" >> report.md
+            
+            # Security analysis
+            echo "## Security Impact" >> report.md
+            npm audit --json > audit.json || true
+            
+            if [ -s audit.json ]; then
+              echo "Security issues found in dependencies:" >> report.md
+              echo "\`\`\`" >> report.md
+              jq -r '.vulnerabilities | to_entries | .[] | "\(.key): \(.value.severity) severity"' audit.json 2>/dev/null | sort || echo "No direct security issues found."
+              echo "\`\`\`" >> report.md
+            else
+              echo "No direct security issues found." >> report.md
+            fi
+          else
+            echo "All dependencies are up to date! 🎉" >> report.md
+          fi
+
+      - name: Upload dependencies report
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependencies-report
+          path: report.md
+          retention-days: 30
+
+      - name: Create issue if high severity vulnerabilities
+        if: always()
+        uses: peter-evans/create-issue-from-file@v4
+        with:
+          title: Weekly Dependency Update Report
+          content-filepath: ./report.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+          assignees: |
+            maintainer_username
+          labels: |
+            dependencies
+            report

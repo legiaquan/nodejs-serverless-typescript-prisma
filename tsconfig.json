@@ -21,13 +21,6 @@
     "emitDecoratorMetadata": true,
     "strictPropertyInitialization": false
   },
-  "include": [
-    "src/**/*",
-    "tests/**/*",
-    "prisma/**/*",
-    "*.config.js",
-    "*.config.mjs",
-    ".eslintrc.js"
-  ],
-  "exclude": ["node_modules", ".serverless", ".build"]
+  "include": ["src/**/*", "tests/**/*", "prisma/**/*", "*.config.js", "*.config.mjs"],
+  "exclude": ["node_modules", ".serverless", ".build", "dist", "coverage"]
 }

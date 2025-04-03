@@ -1,0 +1,104 @@
+name: Infrastructure Validation
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'serverless.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'serverless.yml'
+  workflow_dispatch:
+
+jobs:
+  validate-serverless:
+    name: Validate Serverless Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install serverless globally
+        run: npm install -g serverless
+
+      - name: Validate serverless.yml
+        run: serverless print --format yaml > /dev/null
+
+      - name: Run serverless doctor
+        run: serverless doctor
+
+  validate-cfn:
+    name: Generate & Validate CloudFormation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install serverless globally
+        run: npm install -g serverless
+
+      - name: Install cfn-lint
+        run: pip install cfn-lint
+
+      - name: Generate CloudFormation template
+        run: serverless package --package .serverless
+
+      - name: Run cfn-lint on generated CloudFormation template
+        run: |
+          find .serverless -name "*.json" -exec cfn-lint {} \;
+
+      - name: Archive CloudFormation artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudformation-templates
+          path: .serverless/*.json
+          retention-days: 5
+
+  policy-check:
+    name: Check IAM Policies
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install serverless globally
+        run: npm install -g serverless
+
+      - name: Install checkov
+        run: pip install checkov
+
+      - name: Generate CloudFormation template
+        run: serverless package --package .serverless
+
+      - name: Run policy checks with checkov
+        run: |
+          find .serverless -name "*.json" -exec checkov -f {} --framework cloudformation --check CKV_AWS_* \;
+        continue-on-error: true
