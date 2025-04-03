@@ -19,6 +19,8 @@
     "lint:fix": "eslint . --ext .ts --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
     "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "format:fix": "npm run fix:line-endings && npm run format",
+    "fix:line-endings": "git add . && git config core.autocrlf false && git config core.eol lf && git rm --cached -r . && git reset --hard",
     "test": "jest",
     "test:coverage": "jest --coverage",
     "test:watch": "jest --watch",

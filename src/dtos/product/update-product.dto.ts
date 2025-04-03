@@ -1,5 +1,5 @@
 import { Expose, Type } from 'class-transformer';
-import { IsDecimal,IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
+import { IsDecimal, IsNumber, IsOptional, IsString, Length, Min } from 'class-validator';
 
 /**
  * @swagger

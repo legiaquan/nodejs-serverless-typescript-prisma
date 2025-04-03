@@ -1,0 +1,66 @@
+name: Format Code
+
+on:
+  pull_request:
+    branches: [main, develop]
+  push:
+    branches: [main, develop]
+
+jobs:
+  format:
+    name: Format Code
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Fix line endings
+        run: |
+          echo "Setting git to use LF line endings"
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - name: Format code
+        run: npx prettier --write "**/*.{ts,js,json,md}"
+
+      - name: Check for changes
+        id: git-check
+        run: |
+          git diff --exit-code || echo "has_changes=true" >> $GITHUB_OUTPUT
+
+      - name: Commit changes
+        if: steps.git-check.outputs.has_changes == 'true'
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add -A
+          git commit -m "style: format code with prettier"
+
+      - name: Push changes
+        if: steps.git-check.outputs.has_changes == 'true' && github.event_name == 'push'
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
+
+      - name: Create PR with changes
+        if: steps.git-check.outputs.has_changes == 'true' && github.event_name == 'pull_request'
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: 'style: format code with prettier'
+          title: 'style: format code with prettier'
+          body: 'This PR fixes code formatting issues.'
+          branch: fix-formatting-${{ github.head_ref }}
+          base: ${{ github.head_ref }}
+          labels: 'automated pr,formatting'

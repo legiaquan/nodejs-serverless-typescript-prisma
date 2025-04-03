@@ -1,6 +1,6 @@
 # Node.js Serverless API with TypeScript and Prisma 🚀
 
-[![Build Status](https://img.shields.io/github/workflow/status/yourusername/node-base/CI)](https://github.com/yourusername/node-base/actions)
+[![Build Status](https://img.shields.io/github/workflow/status/legiaquan/nodejs-serverless-typescript-prisma/CI)](https://github.com/legiaquan/nodejs-serverless-typescript-prisma/actions)
 [![Code Style: Prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg)](https://github.com/prettier/prettier)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
@@ -41,7 +41,7 @@ A modern, production-ready Node.js API template built with TypeScript, Serverles
 ```bash
 # Clone the repository
 git clone [repository-url]
-cd node-base
+cd nodejs-serverless-typescript-prisma
 
 # Install dependencies
 npm install
@@ -135,7 +135,7 @@ Before you begin, ensure you have the following installed:
 
    ```bash
    git clone [repository-url]
-   cd node-base
+   cd nodejs-serverless-typescript-prisma
    ```
 
 2. **Install dependencies** 📦

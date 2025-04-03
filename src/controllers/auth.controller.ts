@@ -5,8 +5,8 @@ import jwt from 'jsonwebtoken';
 import type { LoginDTO } from '../dtos/auth/login.dto';
 import type { RegisterDTO } from '../dtos/auth/register.dto';
 import { AuthService } from '../services/auth.service';
-import { AuthFailureError,BadRequestError } from '../utils/error.response';
-import { CreatedResponse,OkResponse } from '../utils/success.response';
+import { AuthFailureError, BadRequestError } from '../utils/error.response';
+import { CreatedResponse, OkResponse } from '../utils/success.response';
 
 export class AuthController {
   private authService: AuthService;

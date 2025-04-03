@@ -24,14 +24,14 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md) to help us main
 2. **Clone your fork** 📥
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/node-base.git
-   cd node-base
+   git clone https://github.com/YOUR_USERNAME/nodejs-serverless-typescript-prisma.git
+   cd nodejs-serverless-typescript-prisma
    ```
 
 3. **Add the upstream remote** 🔗
 
    ```bash
-   git remote add upstream https://github.com/ORIGINAL_OWNER/node-base.git
+   git remote add upstream https://github.com/ORIGINAL_OWNER/nodejs-serverless-typescript-prisma.git
    ```
 
 4. **Install dependencies** 📦
